@@ -6,7 +6,7 @@ from CDNUpdates.CDNContent import CDNContent, CDNPROVIDERS
 
 from sublime import DRAW_EMPTY_AS_OVERWRITE, DRAW_NO_FILL, DRAW_NO_OUTLINE, \
     DRAW_SOLID_UNDERLINE
-from sublime import IGNORECASE, message_dialog
+from sublime import IGNORECASE, active_window, message_dialog
 
 from sublime_plugin import EventListener, TextCommand
 
@@ -78,7 +78,23 @@ class CDNUpdatesCommand(TextCommand):
     def check_for_updates(self):
         # See `CDNContent.py:handleProvider()` to check what is done.
         for cdnContent in self.cdnContentList:
-            cdnContent.handleProvider()
+            try:
+                cdnContent.handleProvider()
+
+            except OSError as e:
+                # Let's display the console and log an error there.
+                if active_window().active_panel() != 'console':
+                    active_window().run_command(
+                        'show_panel', {'panel': 'console', 'toggle': True}
+                    )
+
+                print('CDNUpdates: An error occurred for \"{}\" ({}).'.format(
+                    cdnContent.parsedResult.netloc,
+                    e.reason)
+                )
+
+                # But we'll display a red icon anyway...
+                cdnContent.status = 'not_found'
 
             # If this CDN represents a problem "that has to be fixed"...
             if cdnContent.status != 'up_to_date':
