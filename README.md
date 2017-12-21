@@ -18,6 +18,7 @@ Coming soon...
 
 * [X] <https://cdnjs.com/>
 * [X] <https://bootstrapcdn.com/>
+* [X] <https://code.jquery.com/>
 * [ ] More soon...
 
 ## Frequently Asked Questions

@@ -1,6 +1,7 @@
 
 
 import json
+import re
 from urllib.request import urlopen
 
 
@@ -9,8 +10,14 @@ CDNPROVIDERS = {
     'cdnjs.cloudflare.com':
         'https://api.cdnjs.com/libraries?search={name}&fields=version',
     'maxcdn.bootstrapcdn.com':
+        'https://api.github.com/repos/{owner}/{name}/tags',
+    'code.jquery.com':
         'https://api.github.com/repos/{owner}/{name}/tags'
 }
+
+# This regex has been written by @sindresorhus for Semver.
+# (https://github.com/sindresorhus/semver-regex)
+SEMVER_REGEX = 'v?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?'
 
 
 # Simple object to store a CDN element (Sublime.Region + Urllib.ParseResult)
@@ -86,6 +93,48 @@ class CDNContent():
                 data = json.loads(request.read().decode())
 
                 if len(data) >= 1 and data[0]['name'].lstrip('v') == tmp[2]:
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
+
+            else:
+                print('CDNUpdates: You should check your Internet connection.')
+
+        elif self.parsedResult.netloc == 'code.jquery.com':
+            tmp = self.parsedResult.path.split('/')
+
+            if tmp[1].startswith('jquery'):
+                name = 'jquery'
+                version = re.search(SEMVER_REGEX, tmp[1]).group(0)
+
+            elif tmp[1] in ['ui', 'mobile', 'color']:
+                name = 'jquery-' + tmp[1]
+                version = tmp[2]
+
+            elif tmp[1] == 'qunit':
+                name = 'qunit'
+                version = re.search(SEMVER_REGEX, tmp[2]).group(0)
+
+            elif tmp[1] == 'pep':
+                name = 'PEP'
+                version = tmp[2]
+
+            else:
+                self.status = 'not_found'
+                return
+
+            request = urlopen(
+                CDNPROVIDERS[self.parsedResult.netloc].format(
+                    # Only `QUnit` belongs to another organization.
+                    owner=('qunitjs' if name == 'qunit' else 'jquery'),
+                    name=name)
+            )
+
+            if request.getcode() == 200:
+                data = json.loads(request.read().decode())
+
+                if len(data) >= 1 and data[0]['name'].lstrip('v') == version:
                     self.status = 'up_to_date'
 
                 else:
