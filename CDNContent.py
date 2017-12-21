@@ -7,7 +7,9 @@ from urllib.request import urlopen
 # This dictionary stores the CDN providers handled as long as their API link.
 CDNPROVIDERS = {
     'cdnjs.cloudflare.com':
-        'https://api.cdnjs.com/libraries?search={name}&fields=version'
+        'https://api.cdnjs.com/libraries?search={name}&fields=version',
+    'maxcdn.bootstrapcdn.com':
+        'https://api.github.com/repos/{owner}/{name}/tags'
 }
 
 
@@ -29,7 +31,8 @@ class CDNContent():
             # We use the API link specified within `CDNPROVIDERS` and...
             # ... format it with the `name` of the library.
             request = urlopen(
-                CDNPROVIDERS[self.parsedResult.netloc].format(name=tmp[3]))
+                CDNPROVIDERS[self.parsedResult.netloc].format(name=tmp[3])
+            )
 
             # If the request was a success...
             if request.getcode() == 200:
@@ -47,6 +50,46 @@ class CDNContent():
 
                 else:
                     self.status = 'not_found'
+
+            else:
+                print('CDNUpdates: You should check your Internet connection.')
+
+        elif self.parsedResult.netloc == 'maxcdn.bootstrapcdn.com':
+            name = None
+            tmp = self.parsedResult.path.split('/')
+
+            if tmp[1] == 'bootstrap':
+                owner = 'twbs'
+
+            elif tmp[1] == 'font-awesome':
+                owner, name = 'FortAwesome', 'Font-Awesome'
+
+            elif tmp[1] == 'bootlint':
+                owner = 'twbs'
+
+            elif tmp[1] == 'bootswatch':
+                owner = 'thomaspark'
+
+            else:
+                # We don't know such a content delivered by BOOTSTRAPCDN.COM...
+                self.status = 'not_found'
+                return
+
+            # We ask directly the GitHub API for the latest tag name.
+            request = urlopen(
+                CDNPROVIDERS[self.parsedResult.netloc].format(
+                    owner=owner,
+                    name=name or tmp[1])
+            )
+
+            if request.getcode() == 200:
+                data = json.loads(request.read().decode())
+
+                if len(data) >= 1 and data[0]['name'].lstrip('v') == tmp[2]:
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
 
             else:
                 print('CDNUpdates: You should check your Internet connection.')

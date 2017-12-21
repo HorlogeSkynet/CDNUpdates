@@ -17,6 +17,7 @@ Coming soon...
 ## CDN Providers currently handled
 
 * [X] <https://cdnjs.com/>
+* [X] <https://bootstrapcdn.com/>
 * [ ] More soon...
 
 ## Frequently Asked Questions
