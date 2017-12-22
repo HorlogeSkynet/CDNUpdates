@@ -14,6 +14,8 @@ CDNPROVIDERS = {
     'maxcdn.bootstrapcdn.com':
         'https://api.github.com/repos/{owner}/{name}/tags',
     'code.jquery.com':
+        'https://api.github.com/repos/{owner}/{name}/tags',
+    'ajax.googleapis.com':
         'https://api.github.com/repos/{owner}/{name}/tags'
 }
 
@@ -149,6 +151,64 @@ class CDNContent():
                 data = json.loads(request.read().decode())
 
                 if len(data) >= 1 and data[0]['name'].lstrip('v') == version:
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
+
+            else:
+                print('CDNUpdates: You should check your Internet connection.')
+
+        elif self.parsedResult.netloc == 'ajax.googleapis.com':
+            tmp = self.parsedResult.path.split('/')
+
+            # The CDNs provided by Google are well "sorted". This dictionary...
+            # ... will only store the correspondences with GitHub repositories.
+            CORRESPONDENCES = {
+                'dojo': {'owner': 'dojo', 'name': 'dojo'},
+                'ext-core': {'owner': 'ExtCore', 'name': 'ExtCore'},
+                'hammerjs': {'owner': 'hammerjs', 'name': 'hammer.js'},
+                'indefinite-observable': {
+                    'owner': 'material-motion',
+                    'name':  'indefinite-observable-js'
+                },
+                'jquery':       {'owner': 'jquery', 'name': 'jquery'},
+                'jquerymobile': {'owner': 'jquery', 'name': 'jquery-mobile'},
+                'jqueryui':     {'owner': 'jquery', 'name': 'jquery-ui'},
+                'mootools': {'owner': 'mootools', 'name': 'mootools-core'},
+                'myanmar-tools': {
+                    'owner': 'googlei18n',
+                    'name': 'myanmar-tools'
+                },
+                'prototype': {'owner': 'sstephenson', 'name': 'prototype'},
+                'scriptaculous': {
+                    'owner': 'madrobby',
+                    'name': 'scriptaculous'
+                },
+                'shaka-player': {'owner': 'google', 'name': 'shaka-player'},
+                'spf': {'owner': 'youtube', 'name': 'spfjs'},
+                'swfobject': {'owner': 'swfobject', 'name': 'swfobject'},
+                'threejs': {'owner': 'mrdoob', 'name': 'three.js'},
+                'webfont': {'owner': 'typekit', 'name': 'webfontloader'}
+            }
+
+            if tmp[3] not in CORRESPONDENCES.keys():
+                self.status = 'not_found'
+                return
+
+            request = urlopen(Request(
+                CDNPROVIDERS[self.parsedResult.netloc].format(
+                    owner=CORRESPONDENCES.get(tmp[3])['owner'],
+                    name=CORRESPONDENCES.get(tmp[3])['name']),
+                headers={
+                    'Authorization': 'token ' + self.settings.get('github_api')
+                } if self.settings.get('github_api') else {}
+            ))
+
+            if request.getcode() == 200:
+                data = json.loads(request.read().decode())
+
+                if len(data) >= 1 and data[0]['name'].lstrip('v') == tmp[4]:
                     self.status = 'up_to_date'
 
                 else:

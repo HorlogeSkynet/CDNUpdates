@@ -2,6 +2,16 @@
 
 > A Sublime Text 3 plugin to check for CDN updates in your Web pages
 
+Bored of manually check if your CDNs are up to date ? Yeah, so was I...  
+This is what this Sublime Text 3 plugin does (well) :
+
+1. Gathers links present in your current sheet
+2. Compares them with a list containing known CDN providers
+3. Figures out a way to retrieve the latest "version" of each resource, and compares it with the one you are currently using
+4. Displays a basic (ugly ?) icon in the gutter, to inform you of the result
+
+Of course, when this plugin does not use the API of the CDN provider, it may informs you of a newer published version, possibly not available from your provider (it would be time to opt out of this privacy mess, by the way...).
+
 ## Installation
 
 Coming soon...
@@ -12,7 +22,9 @@ Coming soon...
 
 * Press `CTRL + SHIFT + C`
 
-* Right click on your file : `CDNUpdates >`
+* Right click on your file : `CDNUpdates > ...`
+
+* `Tools > Packages > CDNUpdates > ...`
 
 ## Settings
 
@@ -25,6 +37,7 @@ If you have many many CDNs in your sheets (or if you want to contribute to this 
 * [X] <https://cdnjs.com/>
 * [X] <https://bootstrapcdn.com/>
 * [X] <https://code.jquery.com/>
+* [X] <https://ajax.googleapis.com/>
 * [ ] More soon...
 
 ## Frequently Asked Questions
