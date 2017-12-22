@@ -14,6 +14,12 @@ Coming soon...
 
 * Right click on your file : `CDNUpdates >`
 
+## Settings
+
+Most of the CDN providers don't provide any API for their service, so it would be very tricky to retrieve latest version available directly from them.  
+Unless for <https://cdnjs.com/>, this plugin is actually based on the GitHub API to fetch from repositories the latest existing Git tag. Its `name` is compared afterwards with the version present in the CDN you got in your sources.  
+If you have many many CDNs in your sheets (or if you want to contribute to this project 😜), you'll surely need to set a GitHub API token to avoid reaching the rate limit. You can generate one [here](https://github.com/settings/tokens), and paste in under the plugin preferences (accessible from `CDNUpdates`'s Sublime menu).
+
 ## CDN Providers currently handled
 
 * [X] <https://cdnjs.com/>

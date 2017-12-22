@@ -2,7 +2,9 @@
 
 import json
 import re
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
+
+from sublime import load_settings
 
 
 # This dictionary stores the CDN providers handled as long as their API link.
@@ -25,7 +27,13 @@ class CDNContent():
     def __init__(self, region, parsedResult):
         self.sublimeRegion = region
         self.parsedResult = parsedResult
+
+        # This variable will store a status as the ones below :
+        # ('up_to_date', 'to_update', 'not_found')
         self.status = None
+
+        # We load the settings file to retrieve a GitHub API token afterwards.
+        self.settings = load_settings('Preferences.sublime-settings')
 
     def handleProvider(self):
         # CDNJS.com will be handled here.
@@ -83,11 +91,14 @@ class CDNContent():
                 return
 
             # We ask directly the GitHub API for the latest tag name.
-            request = urlopen(
+            request = urlopen(Request(
                 CDNPROVIDERS[self.parsedResult.netloc].format(
                     owner=owner,
-                    name=name or tmp[1])
-            )
+                    name=name or tmp[1]),
+                headers={
+                    'Authorization': 'token ' + self.settings.get('github_api')
+                } if self.settings.get('github_api') else {}
+            ))
 
             if request.getcode() == 200:
                 data = json.loads(request.read().decode())
@@ -124,12 +135,15 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
-            request = urlopen(
+            request = urlopen(Request(
                 CDNPROVIDERS[self.parsedResult.netloc].format(
                     # Only `QUnit` belongs to another organization.
                     owner=('qunitjs' if name == 'qunit' else 'jquery'),
-                    name=name)
-            )
+                    name=name),
+                headers={
+                    'Authorization': 'token ' + self.settings.get('github_api')
+                } if self.settings.get('github_api') else {}
+            ))
 
             if request.getcode() == 200:
                 data = json.loads(request.read().decode())
