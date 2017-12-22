@@ -71,7 +71,7 @@ class CDNUpdatesCommand(TextCommand):
             )
 
             # ... to check if it's a known CDN provider
-            if parsedResult.netloc in CDNPROVIDERS.keys():
+            if parsedResult.netloc in CDNPROVIDERS:
                 # If this matches, we store it and move on to the next element.
                 self.cdnContentList.append(CDNContent(region, parsedResult))
 
