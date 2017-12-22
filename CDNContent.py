@@ -70,6 +70,7 @@ class CDNContent():
                     self.status = 'not_found'
 
             else:
+                self.status = 'not_found'
                 print('CDNUpdates: You should check your Internet connection.')
 
         elif self.parsedResult.netloc == 'maxcdn.bootstrapcdn.com':
