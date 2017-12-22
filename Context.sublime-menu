@@ -1,11 +1,11 @@
 [
 {
-	"id" : "cdn_updates",
-	"caption" : "CDNUpdates",
+	"id": "cdn_updates",
+	"caption": "CDNUpdates",
 	"children": [
 		{
-			"command" : "c_dNUpdates",
-			"caption" : "CDNUpdates: Check this view for CDN updates"
+			"command": "c_dNUpdates",
+			"caption": "Check this view for CDN updates"
 		}
 	]
 }
