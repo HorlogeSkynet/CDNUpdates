@@ -176,17 +176,21 @@ class CDNContent():
 
         # CDN from CDN.JSDLIVR.NET will be handled here.
         elif self.parsedResult.netloc == 'cdn.jsdelivr.net':
+            """
+            The API from JSDLIVR is powerful. It implies we compute a
+              "fuzzy" version checking (ex: 'jquery@3' is OK for '3.2.1')
+            """
             tmp = self.parsedResult.path.split('/')
 
             try:
                 if tmp[1] == 'npm':
                     name, version = tmp[2].split('@')
-                    print(name, version)
                     self.getLatestTagFromNPMSJ(name, version)
 
                 elif tmp[1] == 'gh':
                     name, version = tmp[3].split('@')
-                    self.getLatestTagFromGitHub(tmp[2], name, version)
+                    self.getLatestTagFromGitHub(tmp[2], name, version,
+                                                fuzzyCheck=True)
 
                 elif tmp[1] == 'wp':
                     # This how we'll handle the latest version references, as :
@@ -223,7 +227,7 @@ class CDNContent():
         else:
             print('CDNUpdates: This statement should not be reached.')
 
-    def getLatestTagFromGitHub(self, owner, name, version):
+    def getLatestTagFromGitHub(self, owner, name, version, fuzzyCheck=False):
         """
         This method fetches tags from the `owner/name` repository on GitHub...
         ... and compares it with `version`.
@@ -241,11 +245,18 @@ class CDNContent():
         if request.getcode() == 200:
             data = json.loads(request.read().decode())
 
-            if len(data) >= 1 and data[0]['name'].lstrip('v') == version:
-                self.status = 'up_to_date'
+            if len(data) >= 1:
+                if (not fuzzyCheck and data[0]['name'].lstrip('v') == version)\
+                        or data[0]['name'].find(version, 0) == 0:
+
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
 
             else:
-                self.status = 'to_update'
+                # Should not be reached (GitHub issue or repository moved ?).
+                self.status = 'not_found'
 
         else:
             self.status = 'not_found'
@@ -265,9 +276,12 @@ class CDNContent():
             data = json.loads(request.read().decode())
 
             if data['total'] >= 1 and \
-                    data['results'][0]['package']['name'] == name:
+                    data['results'][0]['package']['name'] == name and \
+                    data['results']['score']['searchScore'] >= 100000:
 
-                if data['results'][0]['package']['version'] == version:
+                # "Fuzzy" version checking below !
+                if data['results'][0]['package']['version'].find(version, 0) \
+                        == 0:
                     self.status = 'up_to_date'
 
                 else:
