@@ -238,8 +238,9 @@ class CDNContent():
                 owner=owner,
                 name=name),
             headers={
-                'Authorization': 'token ' + self.settings.get('github_api')
-            } if self.settings.get('github_api') else {}
+                'Authorization': 'token ' +
+                self.settings.get('github_api_token')
+            } if self.settings.get('github_api_token') else {}
         ))
 
         if request.getcode() == 200:
