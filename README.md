@@ -38,6 +38,7 @@ If you have many many CDNs in your sheets (or if you want to contribute to this 
 * [X] <https://bootstrapcdn.com/>
 * [X] <https://code.jquery.com/>
 * [X] <https://ajax.googleapis.com/>
+* [X] <https://jsdelivr.com/>
 * [ ] More soon...
 
 ## Frequently Asked Questions

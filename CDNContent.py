@@ -4,7 +4,7 @@ import json
 import re
 from urllib.request import Request, urlopen
 
-from sublime import load_settings
+from sublime import active_window, load_settings
 
 
 # This dictionary stores the CDN providers handled as long as their API link.
@@ -12,7 +12,8 @@ CDNPROVIDERS = [
     'cdnjs.cloudflare.com',
     'maxcdn.bootstrapcdn.com',
     'code.jquery.com',
-    'ajax.googleapis.com'
+    'ajax.googleapis.com',
+    'cdn.jsdelivr.net'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -35,7 +36,7 @@ class CDNContent():
 
     def handleProvider(self):
         """
-        This is the main method of CDNUpdates.
+        This is the most important method of CDNUpdates.
         This is where are comparing the versions in function of the provider...
         ... and their different formatting conventions.
         """
@@ -173,6 +174,48 @@ class CDNContent():
                     tmp[4]
                 )
 
+        # CDN from CDN.JSDLIVR.NET will be handled here.
+        elif self.parsedResult.netloc == 'cdn.jsdelivr.net':
+            tmp = self.parsedResult.path.split('/')
+
+            try:
+                if tmp[1] == 'npm':
+                    name, version = tmp[2].split('@')
+                    print(name, version)
+                    self.getLatestTagFromNPMSJ(name, version)
+
+                elif tmp[1] == 'gh':
+                    name, version = tmp[3].split('@')
+                    self.getLatestTagFromGitHub(tmp[2], name, version)
+
+                elif tmp[1] == 'wp':
+                    # This how we'll handle the latest version references, as :
+                    # (https://cdn.jsdelivr.net/wp/wp-slimstat/trunk/wp-slimstat.js)
+                    if len(tmp) < 6:
+                        raise IndexError
+
+                    self.getLatestTagFromWPSVN(tmp[2], tmp[4])
+
+                else:
+                    self.status = 'not_found'
+
+            except (ValueError, IndexError):
+                # This statement is here to handle `split()` errors.
+                #
+                # This page looks using a CDN without specifying a version.
+                # Let's inform the user !
+                self.status = 'to_update'
+
+                # We'll log something on the console, let's open it !
+                if active_window().active_panel() != 'console':
+                    active_window().run_command(
+                        'show_panel', {'panel': 'console', 'toggle': True}
+                    )
+
+                print('CDNUpdates: You should always specify a version for'
+                      ' your CDN in production. ({})'.format(
+                            self.parsedResult.geturl()))
+
         elif False:
             # Additional CDN providers will have to be handled there
             pass
@@ -203,6 +246,59 @@ class CDNContent():
 
             else:
                 self.status = 'to_update'
+
+        else:
+            self.status = 'not_found'
+            print('CDNUpdates: You should check your Internet connection.')
+
+    def getLatestTagFromNPMSJ(self, name, version):
+        request = urlopen(Request(
+            'https://api.npms.io/v2/search?q={name}'.format(name=name),
+            # The API of NPMJS blocks the scripts, we need to spoof a real UA.
+            headers={
+                'User-Agent': 'Mozilla/5.0(X11; U; Linux i686) '
+                              'Gecko/20071127 Firefox/2.0.0.11'
+            }
+        ))
+
+        if request.getcode() == 200:
+            data = json.loads(request.read().decode())
+
+            if data['total'] >= 1 and \
+                    data['results'][0]['package']['name'] == name:
+
+                if data['results'][0]['package']['version'] == version:
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
+
+            else:
+                self.status = 'not_found'
+
+        else:
+            self.status = 'not_found'
+            print('CDNUpdates: You should check your Internet connection.')
+
+    def getLatestTagFromWPSVN(self, name, version):
+        request = urlopen(
+            'https://plugins.svn.wordpress.org/{name}/tags/'.format(name=name),
+        )
+
+        if request.getcode() == 200:
+            # A f*cked-up one-liner to retrieve the latest version from SVN...
+            data = re.findall('<li><a href=\".*\">(.*)<\/a><\/li>',
+                              request.read().decode())
+
+            if len(data) >= 1:
+                if data[-1].rstrip('/') == version:
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
+
+            else:
+                self.status = 'not_found'
 
         else:
             self.status = 'not_found'

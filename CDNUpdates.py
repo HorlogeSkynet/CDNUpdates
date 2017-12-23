@@ -89,7 +89,7 @@ class CDNUpdatesCommand(TextCommand):
                     )
 
                 print('CDNUpdates: An error occurred for \"{}\" ({}).'.format(
-                    cdnContent.parsedResult.netloc,
+                    cdnContent.parsedResult.geturl(),
                     e.reason)
                 )
 
