@@ -206,7 +206,7 @@ class CDNContent():
             except (ValueError, IndexError):
                 # This statement is here to handle `split()` errors.
                 #
-                # This page looks using a CDN without specifying a version.
+                # This page seems using a CDN without specifying a version.
                 # Let's inform the user !
                 self.status = 'to_update'
 
@@ -297,7 +297,7 @@ class CDNContent():
 
     def getLatestTagFromWPSVN(self, name, version):
         request = urlopen(
-            'https://plugins.svn.wordpress.org/{name}/tags/'.format(name=name),
+            'https://plugins.svn.wordpress.org/{name}/tags/'.format(name=name)
         )
 
         if request.getcode() == 200:
