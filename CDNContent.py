@@ -278,7 +278,7 @@ class CDNContent():
 
             if data['total'] >= 1 and \
                     data['results'][0]['package']['name'] == name and \
-                    data['results']['score']['searchScore'] >= 100000:
+                    data['results'][0]['searchScore'] >= 100000:
 
                 # "Fuzzy" version checking below !
                 if data['results'][0]['package']['version'].find(version, 0) \
