@@ -9,6 +9,7 @@ This is what this Sublime Text 3 plugin does (well) :
 2. Compares them to a list containing known CDN providers
 3. Figures out a way (with providers' API or with GitHub one) to retrieve the latest "version" of each resource, and compares it with the one you are currently using
 4. Displays a basic (ugly ?) icon in the gutter, to inform you of the result
+5. Displays a _Phantom_ object with the latest version available
 
 Of course, when this plugin does not use the API of the CDN provider, it may informs you of a newer published version, possibly not available from your provider (it would be time to opt out of this privacy mess, by the way...).
 
@@ -46,6 +47,10 @@ If you have many many CDNs in your sheets (or if you want to contribute to this 
 ### How do I get rid of your horrible icons in the gutter ?
 
 > It'll be done automatically next time you'll save your sheet :wink:
+
+### I've updated my links, but the _Phantom_ objects don't want to leave...
+
+> Same as above :smile:
 
 ### Can I add another or my own CDN ?
 

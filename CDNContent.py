@@ -31,6 +31,10 @@ class CDNContent():
         # ('up_to_date', 'to_update', 'not_found')
         self.status = None
 
+        # These variables will store the final information of this CDN.
+        self.name = None
+        self.latestVersion = None
+
         # We load the settings file to retrieve a GitHub API token afterwards.
         self.settings = load_settings('Preferences.sublime-settings')
 
@@ -60,8 +64,12 @@ class CDNContent():
 
                 # If there is at least one result, which matches our library...
                 if data['total'] >= 1 and data['results'][0]['name'] == tmp[3]:
+                    # We set here its name and version for future usages.
+                    self.name = tmp[3]
+                    self.latestVersion = data['results'][0]['version']
+
                     # ... let's compare its version with ours !
-                    if data['results'][0]['version'] == tmp[4]:
+                    if self.latestVersion == tmp[4]:
                         self.status = 'up_to_date'
 
                     else:
@@ -75,14 +83,14 @@ class CDNContent():
                 print('CDNUpdates: You should check your Internet connection.')
 
         elif self.parsedResult.netloc == 'maxcdn.bootstrapcdn.com':
-            name = None
             tmp = self.parsedResult.path.split('/')
+            self.name = tmp[1]
 
             if tmp[1] == 'bootstrap':
                 owner = 'twbs'
 
             elif tmp[1] == 'font-awesome':
-                owner, name = 'FortAwesome', 'Font-Awesome'
+                owner, self.name = 'FortAwesome', 'Font-Awesome'
 
             elif tmp[1] == 'bootlint':
                 owner = 'twbs'
@@ -95,26 +103,26 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
-            self.getLatestTagFromGitHub(owner, name or tmp[1], tmp[2])
+            self.getLatestTagFromGitHub(owner, self.name, tmp[2])
 
         # CDN from CODE.JQUERY.COM will be handled here.
         elif self.parsedResult.netloc == 'code.jquery.com':
             tmp = self.parsedResult.path.split('/')
 
             if tmp[1].startswith('jquery'):
-                name = 'jquery'
+                self.name = 'jquery'
                 version = re.search(SEMVER_REGEX, tmp[1]).group(0)
 
             elif tmp[1] in ['ui', 'mobile', 'color']:
-                name = 'jquery-' + tmp[1]
+                self.name = 'jquery-' + tmp[1]
                 version = tmp[2]
 
             elif tmp[1] == 'qunit':
-                name = 'qunit'
+                self.name = 'qunit'
                 version = re.search(SEMVER_REGEX, tmp[2]).group(0)
 
             elif tmp[1] == 'pep':
-                name = 'PEP'
+                self.name = 'PEP'
                 version = tmp[2]
 
             else:
@@ -123,8 +131,8 @@ class CDNContent():
 
             self.getLatestTagFromGitHub(
                 # Only `QUnit` belongs to another organization.
-                ('qunitjs' if name == 'qunit' else 'jquery'),
-                name,
+                ('qunitjs' if self.name == 'qunit' else 'jquery'),
+                self.name,
                 version
             )
 
@@ -168,6 +176,8 @@ class CDNContent():
                 return
 
             else:
+                self.name = tmp[3]
+
                 self.getLatestTagFromGitHub(
                     CORRESPONDENCES.get(tmp[3])['owner'],
                     CORRESPONDENCES.get(tmp[3])['name'],
@@ -184,12 +194,12 @@ class CDNContent():
 
             try:
                 if tmp[1] == 'npm':
-                    name, version = tmp[2].split('@')
-                    self.getLatestTagFromNPMSJ(name, version)
+                    self.name, version = tmp[2].split('@')
+                    self.getLatestTagFromNPMSJ(self.name, version)
 
                 elif tmp[1] == 'gh':
-                    name, version = tmp[3].split('@')
-                    self.getLatestTagFromGitHub(tmp[2], name, version,
+                    self.name, version = tmp[3].split('@')
+                    self.getLatestTagFromGitHub(tmp[2], self.name, version,
                                                 fuzzyCheck=True)
 
                 elif tmp[1] == 'wp':
@@ -198,7 +208,8 @@ class CDNContent():
                     if len(tmp) < 6:
                         raise IndexError
 
-                    self.getLatestTagFromWPSVN(tmp[2], tmp[4])
+                    self.name = tmp[2]
+                    self.getLatestTagFromWPSVN(self.name, tmp[4])
 
                 else:
                     self.status = 'not_found'
@@ -247,8 +258,9 @@ class CDNContent():
             data = json.loads(request.read().decode())
 
             if len(data) >= 1:
-                if (not fuzzyCheck and data[0]['name'].lstrip('v') == version)\
-                        or data[0]['name'].find(version, 0) == 0:
+                self.latestVersion = data[0]['name'].lstrip('v')
+                if (not fuzzyCheck and self.latestVersion == version) \
+                        or self.latestVersion.find(version, 0) == 0:
 
                     self.status = 'up_to_date'
 
@@ -280,9 +292,10 @@ class CDNContent():
                     data['results'][0]['package']['name'] == name and \
                     data['results'][0]['searchScore'] >= 100000:
 
+                self.latestVersion = data['results'][0]['package']['version']
+
                 # "Fuzzy" version checking below !
-                if data['results'][0]['package']['version'].find(version, 0) \
-                        == 0:
+                if self.latestVersion.find(version, 0) == 0:
                     self.status = 'up_to_date'
 
                 else:
@@ -306,7 +319,9 @@ class CDNContent():
                               request.read().decode())
 
             if len(data) >= 1:
-                if data[-1].rstrip('/') == version:
+                self.latestVersion = data[-1].rstrip('/')
+
+                if self.latestVersion == version:
                     self.status = 'up_to_date'
 
                 else:

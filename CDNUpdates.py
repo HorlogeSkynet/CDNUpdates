@@ -6,7 +6,7 @@ from CDNUpdates.CDNContent import CDNContent, CDNPROVIDERS
 
 from sublime import DRAW_EMPTY_AS_OVERWRITE, DRAW_NO_FILL, DRAW_NO_OUTLINE, \
     DRAW_SOLID_UNDERLINE
-from sublime import IGNORECASE, active_window, message_dialog
+from sublime import IGNORECASE, LAYOUT_BLOCK, active_window, message_dialog
 
 from sublime_plugin import EventListener, TextCommand
 
@@ -101,6 +101,28 @@ class CDNUpdatesCommand(TextCommand):
                 # ... let's scroll directly to its location.
                 self.view.show(cdnContent.sublimeRegion)
 
+                # If the plugin is to update, let's set a "Phantom" with...
+                # ... an interesting contents 😉
+                if cdnContent.latestVersion:
+                    self.view.add_phantom(
+                        'latest_versions',
+                        cdnContent.sublimeRegion,
+                        """
+                            <body id="CDN-new_version">
+                                <style>
+                                    div.new_version {{
+                                        background-color: var(--bluish);
+                                        padding: 10px;
+                                    }}
+                                </style>
+                                <div class="new_version">
+                                    New version for {0} found : <b>{1}</b>
+                                </div>
+                            </body>
+                        """.format(cdnContent.name, cdnContent.latestVersion),
+                        LAYOUT_BLOCK
+                    )
+
         # Let's add some regions for the user with specific colors.
         # This is done afterwards to reduce the number of regions drawn.
         for status in ['up_to_date', 'to_update', 'not_found']:
@@ -132,6 +154,10 @@ class CDNUpdatesCommand(TextCommand):
 
 class CDNUpdatesListener(EventListener):
     def on_pre_save_async(self, view):
+        # We just remove each regions containing icons in the gutter...
         view.erase_regions('up_to_date')
         view.erase_regions('to_update')
         view.erase_regions('not_found')
+
+        # ... and our phantoms objects containing the latest versions.
+        view.erase_phantoms('latest_versions')
