@@ -47,37 +47,9 @@ class CDNContent():
             # We temporally store the result of the path split around '/'.
             # The library name will be in `[3]`, and its version in `[4]`.
             tmp = self.parsedResult.path.split('/')
+            self.name = tmp[3]
 
-            # We ask CDNJS API to retrieve information about this library.
-            request = urlopen(
-                'https://api.cdnjs.com/libraries?search={name}&fields=version'
-                .format(name=tmp[3])
-            )
-
-            # If the request was a success...
-            if request.getcode() == 200:
-                # ... we fetch and decode the data from the payload
-                data = json.loads(request.read().decode())
-
-                # If there is at least one result, which matches our library...
-                if data['total'] >= 1 and data['results'][0]['name'] == tmp[3]:
-                    # We set here its name and version for future usages.
-                    self.name = tmp[3]
-                    self.latestVersion = data['results'][0]['version']
-
-                    # ... let's compare its version with ours !
-                    if self.latestVersion == tmp[4]:
-                        self.status = 'up_to_date'
-
-                    else:
-                        self.status = 'to_update'
-
-                else:
-                    self.status = 'not_found'
-
-            else:
-                self.status = 'not_found'
-                print('CDNUpdates: You should check your Internet connection.')
+            self.compareWithLatestCDNJSVersion(self.name, tmp[4])
 
         elif self.parsedResult.netloc == 'maxcdn.bootstrapcdn.com':
             tmp = self.parsedResult.path.split('/')
@@ -100,7 +72,7 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
-            self.getLatestTagFromGitHub(owner, self.name, tmp[2])
+            self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
 
         # CDN from CODE.JQUERY.COM will be handled here.
         elif self.parsedResult.netloc == 'code.jquery.com':
@@ -126,7 +98,7 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
-            self.getLatestTagFromGitHub(
+            self.compareWithLatestGitHubTag(
                 # Only `QUnit` belongs to another organization.
                 ('qunitjs' if self.name == 'qunit' else 'jquery'),
                 self.name,
@@ -175,7 +147,7 @@ class CDNContent():
             else:
                 self.name = tmp[3]
 
-                self.getLatestTagFromGitHub(
+                self.compareWithLatestGitHubTag(
                     CORRESPONDENCES.get(tmp[3])['owner'],
                     CORRESPONDENCES.get(tmp[3])['name'],
                     tmp[4]
@@ -192,12 +164,12 @@ class CDNContent():
             try:
                 if tmp[1] == 'npm':
                     self.name, version = tmp[2].split('@')
-                    self.getLatestTagFromNPMSJ(self.name, version)
+                    self.compareWithNPMJSVersion(self.name, version)
 
                 elif tmp[1] == 'gh':
                     self.name, version = tmp[3].split('@')
-                    self.getLatestTagFromGitHub(tmp[2], self.name, version,
-                                                fuzzyCheck=True)
+                    self.compareWithLatestGitHubTag(tmp[2], self.name, version,
+                                                    fuzzyCheck=True)
 
                 elif tmp[1] == 'wp':
                     # This how we'll handle the latest version references, as :
@@ -206,7 +178,7 @@ class CDNContent():
                         raise IndexError
 
                     self.name = tmp[2]
-                    self.getLatestTagFromWPSVN(self.name, tmp[4])
+                    self.compareWithLatestWPSVNTag(self.name, tmp[4])
 
                 else:
                     self.status = 'not_found'
@@ -235,7 +207,41 @@ class CDNContent():
         else:
             print('CDNUpdates: This statement should not be reached.')
 
-    def getLatestTagFromGitHub(self, owner, name, version, fuzzyCheck=False):
+    # The methods below are handling interface with the providers' API...
+    # ... and version comparison.
+    def compareWithLatestCDNJSVersion(self, name, version):
+        # We ask CDNJS API to retrieve information about this library.
+        request = urlopen(
+            'https://api.cdnjs.com/libraries?search={name}&fields=version'
+            .format(name=name)
+        )
+
+        # If the request was a success...
+        if request.getcode() == 200:
+            # ... we fetch and decode the data from the payload
+            data = json.loads(request.read().decode())
+
+            # If there is at least one result, which matches our library...
+            if data['total'] >= 1 and data['results'][0]['name'] == name:
+                # We set here its name and version for future usages.
+                self.latestVersion = data['results'][0]['version']
+
+                # ... let's compare its version with ours !
+                if self.latestVersion == version:
+                    self.status = 'up_to_date'
+
+                else:
+                    self.status = 'to_update'
+
+            else:
+                self.status = 'not_found'
+
+        else:
+            self.status = 'not_found'
+            print('CDNUpdates: You should check your Internet connection.')
+
+    def compareWithLatestGitHubTag(self, owner, name, version,
+                                   fuzzyCheck=False):
         """
         This method fetches tags from the `owner/name` repository on GitHub...
         ... and compares it with `version`.
@@ -276,7 +282,7 @@ class CDNContent():
             self.status = 'not_found'
             print('CDNUpdates: You should check your Internet connection.')
 
-    def getLatestTagFromNPMSJ(self, name, version):
+    def compareWithNPMJSVersion(self, name, version):
         request = urlopen(Request(
             'https://api.npms.io/v2/search?q={name}'.format(name=name),
             # The API of NPMJS blocks the scripts, we need to spoof a real UA.
@@ -309,7 +315,7 @@ class CDNContent():
             self.status = 'not_found'
             print('CDNUpdates: You should check your Internet connection.')
 
-    def getLatestTagFromWPSVN(self, name, version):
+    def compareWithLatestWPSVNTag(self, name, version):
         request = urlopen(
             'https://plugins.svn.wordpress.org/{name}/tags/'.format(name=name)
         )
