@@ -35,9 +35,6 @@ class CDNContent():
         self.name = None
         self.latestVersion = None
 
-        # We load the settings file to retrieve a GitHub API token afterwards.
-        self.settings = load_settings('Preferences.sublime-settings')
-
     def handleProvider(self):
         """
         This is the most important method of CDNUpdates.
@@ -244,6 +241,10 @@ class CDNContent():
         ... and compares it with `version`.
         `self.status` will be set according to the previous comparison.
         """
+
+        # We load the settings file to retrieve a GitHub API token afterwards.
+        self.settings = load_settings('Preferences.sublime-settings')
+
         request = urlopen(Request(
             'https://api.github.com/repos/{owner}/{name}/tags'.format(
                 owner=owner,
