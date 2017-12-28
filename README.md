@@ -40,6 +40,7 @@ If you have many many CDNs in your sheets (or if you want to contribute to this 
 * [X] <https://code.jquery.com/>
 * [X] <https://ajax.googleapis.com/>
 * [X] <https://jsdelivr.com/>
+* [X] <https://rawgit.com/>
 * [ ] More soon...
 
 ## Frequently Asked Questions

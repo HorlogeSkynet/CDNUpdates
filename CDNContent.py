@@ -13,7 +13,9 @@ CDNPROVIDERS = [
     'maxcdn.bootstrapcdn.com',
     'code.jquery.com',
     'ajax.googleapis.com',
-    'cdn.jsdelivr.net'
+    'cdn.jsdelivr.net',
+    'rawgit.com',
+    'cdn.rawgit.com'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -199,6 +201,21 @@ class CDNContent():
                 print('CDNUpdates: You should always specify a version for'
                       ' your CDN in production. ({})'.format(
                             self.parsedResult.geturl()))
+
+        # CDN from (CDN.)?RAWGIT.COM will be handled here.
+        elif self.parsedResult.netloc in 'cdn.rawgit.com':
+            tmp = self.parsedResult.path.split('/')
+            self.name = tmp[2]
+
+            # If no semantic version is specified in the URL, we assume either :
+            # * The developer uses the latest version available (`master`) [OR]
+            # * The developer knows what he is doing (commit hash specified)
+            if re.search(SEMVER_REGEX, tmp[3]) is None:
+                self.status = 'up_to_date'
+
+            else:
+                # If not, we compare this version with the latest tag !
+                self.compareWithLatestGitHubTag(tmp[1], self.name, tmp[3])
 
         elif False:
             # Additional CDN providers will have to be handled there
