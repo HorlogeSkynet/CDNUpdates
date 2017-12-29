@@ -21,6 +21,9 @@ class CDNUpdatesCommand(TextCommand):
             message_dialog('This file is not loaded yet.')
             return
 
+        else:
+            clear_view(self.view)
+
         self.view.set_status(
             'checking_link',
             'Checking this sheet for links...'
@@ -50,6 +53,11 @@ class CDNUpdatesCommand(TextCommand):
 
 class CDNUpdatesListener(EventListener):
     def on_pre_save_async(self, view):
+        clear_view(view)
+
+
+def clear_view(view):
+    if view:
         # We just remove each regions containing icons in the gutter...
         view.erase_regions('up_to_date')
         view.erase_regions('to_update')
