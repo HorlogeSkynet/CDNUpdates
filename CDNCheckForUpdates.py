@@ -75,8 +75,8 @@ class CheckForUpdates(Thread):
                 'Packages{0}CDNUpdates{0}Icons{0}{1}.png'.format(
                     os.sep, status
                 ),
-                DRAW_EMPTY_AS_OVERWRITE | DRAW_NO_FILL |
-                DRAW_NO_OUTLINE | DRAW_SOLID_UNDERLINE
+                DRAW_EMPTY_AS_OVERWRITE | DRAW_NO_FILL | DRAW_NO_OUTLINE |
+                DRAW_SOLID_UNDERLINE
             )
 
         # Let's make appear a message dialog with a report for the user.
