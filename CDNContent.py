@@ -18,7 +18,8 @@ CDNPROVIDERS = [
     'cdn.jsdelivr.net',
     'rawgit.com',
     'cdn.rawgit.com',
-    'code.ionicframework.com'
+    'code.ionicframework.com',
+    'use.fontawesome.com'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -214,6 +215,12 @@ class CDNContent():
 
             self.compareWithLatestGitHubRelease('ionic-team', self.name,
                                                 tmp[2])
+
+        elif self.parsedResult.netloc == 'use.fontawesome.com':
+            self.name = 'Font Awesome'
+
+            # We assume here that FA's CDN always serves the latest version.
+            self.status = 'up_to_date'
 
         elif False:
             # Additional CDN providers will have to be handled there

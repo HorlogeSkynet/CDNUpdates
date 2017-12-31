@@ -55,6 +55,7 @@ You can generate one [here](https://github.com/settings/tokens), and paste in un
 * [X] <https://jsdelivr.com/>
 * [X] <https://rawgit.com/>
 * [X] <https://code.ionicframework.com/>
+* [X] <https://cdn.fontawesome.com/>
 
 ## Frequently Asked Questions
 
