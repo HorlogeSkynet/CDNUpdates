@@ -50,6 +50,7 @@ class CheckForUpdates(Thread):
                                 <style>
                                     div.new_version {{
                                         background-color: var(--bluish);
+                                        color: black;
                                         padding: 10px;
                                     }}
                                 </style>
