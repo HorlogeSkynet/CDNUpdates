@@ -19,7 +19,8 @@ CDNPROVIDERS = [
     'rawgit.com',
     'cdn.rawgit.com',
     'code.ionicframework.com',
-    'use.fontawesome.com'
+    'use.fontawesome.com',
+    'opensource.keycdn.com'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -222,12 +223,32 @@ class CDNContent():
             # We assume here that FA's CDN always serves the latest version.
             self.status = 'up_to_date'
 
+        elif self.parsedResult.netloc == 'opensource.keycdn.com':
+            tmp = self.parsedResult.path.split('/')
+
+            if tmp[1] == 'fontawesome':
+                owner = 'FortAwesome'
+                self.name = 'Font-Awesome'
+
+            elif tmp[1] == 'pure':
+                owner = 'yahoo'
+                self.name = tmp[1]
+
+            elif tmp[1] == 'angularjs' or True:
+                # Sorry but we can't really handle these cases...
+                log_message('{0} is currently not handled for this provider.'
+                            .format(tmp[1]))
+                self.status = 'not_found'
+                return
+
+            self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
+
         elif False:
             # Additional CDN providers will have to be handled there
             pass
 
         else:
-            log_message('This statement should not be reached.', error=True)
+            log_message('This statement should not be reached.')
 
     # The methods below are handling interface with the providers' API...
     # ... and version comparison.
