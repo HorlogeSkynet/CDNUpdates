@@ -4,7 +4,7 @@ from CDNUpdates.CDNCheckForCDNProviders import CheckForCDNProviders
 from CDNUpdates.CDNCheckForLinks import CheckForLinks
 from CDNUpdates.CDNCheckForUpdates import CheckForUpdates
 
-from sublime import message_dialog
+from sublime import error_message
 
 from sublime_plugin import EventListener, TextCommand
 
@@ -17,11 +17,13 @@ class CDNUpdatesCommand(TextCommand):
         self.regionList = []
         self.cdnContentList = []
 
+        # First we check if the current sheet is not still being loaded.
         if self.view.is_loading():
-            message_dialog('This file is not loaded yet.')
+            error_message('This file is not fully loaded yet.')
             return
 
         else:
+            # If it's OK, we clear the view from the elements added previously.
             clear_view(self.view)
 
         self.view.set_status(

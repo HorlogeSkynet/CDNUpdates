@@ -18,7 +18,15 @@ Of course, when this plugin does not use the API of the CDN provider, it may inf
 
 ## Installation
 
+### With Package Control
+
 Coming soon...
+
+### Manually
+
+1. Move into your Sublime Text packages folder (usually under `$HOME/.config/sublime-text-3/`)
+2. Clone this repository there : `$ git clone https://github.com/HorlogeSkynet/CDNUpdates.git`
+3. Restart Sublime Text and... :tada:
 
 ## Usage
 
