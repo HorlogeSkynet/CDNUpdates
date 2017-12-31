@@ -20,7 +20,8 @@ CDNPROVIDERS = [
     'cdn.rawgit.com',
     'code.ionicframework.com',
     'use.fontawesome.com',
-    'opensource.keycdn.com'
+    'opensource.keycdn.com',
+    'cdn.staticfile.org'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -227,12 +228,10 @@ class CDNContent():
             tmp = self.parsedResult.path.split('/')
 
             if tmp[1] == 'fontawesome':
-                owner = 'FortAwesome'
-                self.name = 'Font-Awesome'
+                owner, self.name = 'FortAwesome', 'Font-Awesome'
 
             elif tmp[1] == 'pure':
-                owner = 'yahoo'
-                self.name = tmp[1]
+                owner, self.name = 'yahoo', tmp[1]
 
             elif tmp[1] == 'angularjs' or True:
                 # Sorry but we can't really handle these cases...
@@ -241,6 +240,30 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
+            self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
+
+        elif self.parsedResult.netloc == 'cdn.staticfile.org':
+            tmp = self.parsedResult.path.split('/')
+
+            if tmp[1] == 'react':
+                owner = 'facebook'
+
+            elif tmp[1] == 'vue':
+                owner = 'vuejs'
+
+            elif tmp[1] == 'angular.js':
+                owner = 'angular'
+
+            elif tmp[1] == 'jquery':
+                owner = 'jquery'
+
+            else:
+                log_message('{0} is currently not handled for this provider.'
+                            .format(tmp[1]))
+                self.status = 'not_found'
+                return
+
+            self.name = tmp[1]
             self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
 
         elif False:
