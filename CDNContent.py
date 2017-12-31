@@ -15,7 +15,8 @@ CDNPROVIDERS = [
     'ajax.googleapis.com',
     'cdn.jsdelivr.net',
     'rawgit.com',
-    'cdn.rawgit.com'
+    'cdn.rawgit.com',
+    'code.ionicframework.com'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -207,7 +208,7 @@ class CDNContent():
             tmp = self.parsedResult.path.split('/')
             self.name = tmp[2]
 
-            # If no semantic version is specified in the URL, we assume either :
+            # If no semantic version is specified in the URL, we assume either:
             # * The developer uses the latest version available (`master`) [OR]
             # * The developer knows what he is doing (commit hash specified)
             if re.search(SEMVER_REGEX, tmp[3]) is None:
@@ -216,6 +217,13 @@ class CDNContent():
             else:
                 # If not, we compare this version with the latest tag !
                 self.compareWithLatestGitHubTag(tmp[1], self.name, tmp[3])
+
+        elif self.parsedResult.netloc == 'code.ionicframework.com':
+            tmp = self.parsedResult.path.split('/')
+            self.name = tmp[1]
+
+            self.compareWithLatestGitHubRelease('ionic-team', self.name,
+                                                tmp[2])
 
         elif False:
             # Additional CDN providers will have to be handled there
@@ -294,6 +302,45 @@ class CDNContent():
             else:
                 # Should not be reached (GitHub issue or repository moved ?).
                 self.status = 'not_found'
+
+        else:
+            self.status = 'not_found'
+            print('CDNUpdates: You should check your Internet connection.')
+
+    def compareWithLatestGitHubRelease(self, owner, name, version,
+                                       fuzzyCheck=False):
+        """
+        This method fetches the latest release from the `owner/name`...
+        ... repository on GitHub and compares it with `version`.
+        `self.status` will be set according to the previous comparison.
+        """
+
+        # We load the settings file to retrieve a GitHub API token afterwards.
+        self.settings = load_settings('Preferences.sublime-settings')
+
+        request = urlopen(Request(
+            'https://api.github.com/repos/{owner}/{name}/releases/latest'
+            .format(
+                owner=owner,
+                name=name
+            ),
+            headers={
+                'Authorization': 'token ' +
+                self.settings.get('github_api_token')
+            } if self.settings.get('github_api_token') else {}
+        ))
+
+        if request.getcode() == 200:
+            data = json.loads(request.read().decode())
+
+            self.latestVersion = data['tag_name'].lstrip('v')
+            if (not fuzzyCheck and self.latestVersion == version) \
+                    or self.latestVersion.find(version, 0) == 0:
+
+                self.status = 'up_to_date'
+
+            else:
+                self.status = 'to_update'
 
         else:
             self.status = 'not_found'
