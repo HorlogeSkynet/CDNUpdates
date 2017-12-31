@@ -1,10 +1,10 @@
 # CDNUpdates
 
-> A Sublime Text 3 plugin to check for CDN updates in your Web pages
+> A Sublime Text 3 plugin to check for CDN updates in your Web sources
 
 ![Preview](https://i.imgur.com/hYZHIui.png)
 
-Bored of manually checking if your CDN (_Content Delivery Network_) are up to date in your web pages ? Yeah, so was I... :confused:
+Tired of manually checking if your CDN (_Content Delivery Network_) are up to date in your web pages ? Yeah, so was I... :confused:
 
 This is what this Sublime Text 3 plugin does (well) to help you dealing with this :
 
@@ -70,5 +70,4 @@ You can generate one [here](https://github.com/settings/tokens), and paste in un
 > Of course you can, unless the Open Source aspect of this project would be useless :fearful:  
 > You basically just have to tweak [CDNContent.py](CDNContent.py) and imitate what is done there for your provider.  
 > Don't forget to share your work with the world ! :earth_africa:  
-> Or... you can just open an [issue here](https://github.com/HorlogeSkynet/CDNUpdates/issues/new) and I'll do my best to handle your case !Preview
-(https://i.imgur.com/hYZHIui.png): https://imgur.com/a/RCXpR
+> Or... you can just open an [issue here](https://github.com/HorlogeSkynet/CDNUpdates/issues/new) and I'll do my best to handle your case !
