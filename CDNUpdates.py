@@ -67,3 +67,5 @@ def clear_view(view):
 
         # ... and our phantoms objects containing the latest versions.
         view.erase_phantoms('latest_versions')
+        # ... and "specify version" advices.
+        view.erase_phantoms('specify_versions')

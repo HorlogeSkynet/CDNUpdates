@@ -25,8 +25,8 @@ class CheckForUpdates(Thread):
                 cdnContent.handleProvider()
 
             except OSError as e:
-                # Let's display the console and log an error there.
-                log_message('An error occurred for \"{}\" ({}).'.format(
+                # Let's log an error there for the user (if `debug` is `true`).
+                log_message('An error occurred for \"{0}\" ({1}).'.format(
                     cdnContent.parsedResult.geturl(),
                     e.reason)
                 )
@@ -35,12 +35,12 @@ class CheckForUpdates(Thread):
                 cdnContent.status = 'not_found'
 
             # If this CDN represents a problem "that has to be fixed"...
-            if cdnContent.status != 'up_to_date':
+            if cdnContent.status == 'to_update':
                 # ... let's scroll directly to its location.
                 self.view.show(cdnContent.sublimeRegion)
 
-                # If the plugin is to update, let's set a "Phantom" with...
-                # ... an interesting contents 😉
+                # If the CDN is to update and we retrieved a newer version...
+                # ...let's set a "Phantom" with an interesting content 😉
                 if cdnContent.latestVersion:
                     self.view.add_phantom(
                         'latest_versions',
@@ -61,7 +61,30 @@ class CheckForUpdates(Thread):
                         LAYOUT_BLOCK
                     )
 
-        # Let's add some regions for the user with specific colors.
+                # Let's inform the user he should specify version for this CDN.
+                else:
+                    self.view.add_phantom(
+                        'specify_versions',
+                        cdnContent.sublimeRegion,
+                        """
+                            <body id="CDN-no_version_found">
+                                <style>
+                                    div.no_version_found {{
+                                        background-color: var(--orangish);
+                                        color: black;
+                                        padding: 10px;
+                                    }}
+                                </style>
+                                <div class="no_version_found">
+                                    You should specify a version for \"{0}\".
+                                </div>
+                            </body>
+                        """.format(cdnContent.parsedResult.path
+                                   .rpartition('/')[2]),
+                        LAYOUT_BLOCK
+                    )
+
+        # Let's add some regions for the user with specific icons.
         # This is done afterwards to reduce the number of regions drawn.
         for status in ['up_to_date', 'to_update', 'not_found']:
             self.view.add_regions(

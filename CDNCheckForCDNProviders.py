@@ -28,6 +28,6 @@ class CheckForCDNProviders():
             # If not, we'll just ignore this region in the future.
             else:
                 log_message(
-                    '\"{}\" has been detected, but won\'t be handled here.'
+                    '\"{0}\" has been detected, but won\'t be handled here.'
                     .format(parsedResult.netloc)
                 )

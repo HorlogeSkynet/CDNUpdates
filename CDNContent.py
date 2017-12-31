@@ -190,15 +190,8 @@ class CDNContent():
 
             except (ValueError, IndexError):
                 # This statement is here to handle `split()` errors.
-                #
                 # This page seems using a CDN without specifying a version.
-                # Let's inform the user !
                 self.status = 'to_update'
-
-                # We'll log something on the console, let's open it !
-                log_message('You should always specify a version for your CDN '
-                            'in production. ({0})'.format(
-                                self.parsedResult.geturl()))
 
         # CDN from (CDN.)?RAWGIT.COM will be handled here.
         elif self.parsedResult.netloc in 'cdn.rawgit.com':
