@@ -65,7 +65,9 @@ def clear_view(view):
         view.erase_regions('to_update')
         view.erase_regions('not_found')
 
-        # ... and our phantoms objects containing the latest versions.
+        # ... and our phantoms objects containing the latest versions...
         view.erase_phantoms('latest_versions')
-        # ... and "specify version" advices.
+        # ... and "specify version" advices...
         view.erase_phantoms('specify_versions')
+        # ... and "specify HTTPS" advices.
+        view.erase_phantoms('specify_https')

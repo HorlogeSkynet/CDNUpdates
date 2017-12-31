@@ -13,6 +13,7 @@ This is what this Sublime Text 3 plugin does (well) to help you dealing with thi
 3. Figures out a way (with providers' API or with GitHub one) to retrieve the latest "version" of each resource, and compares it with the one you are currently using
 4. Displays some icons in the gutter, to inform you of the results
 5. Displays a _Phantom_ object with the latest version available you should be using
+6. _Bonus_ : Shows up a warning for resources not loaded over HTTPS :+1:
 
 Of course, when this plugin does not use the API of the CDN provider, it may informs you of a newer published version, possibly not available from your provider (maybe it's time to opt out from this privacy mess ? :wink:).
 

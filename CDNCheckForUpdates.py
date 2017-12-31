@@ -84,6 +84,31 @@ class CheckForUpdates(Thread):
                         LAYOUT_BLOCK
                     )
 
+            # Security measures !
+            # If this resource is not loaded over HTTPS, we add a warning !
+            if cdnContent.parsedResult.scheme != 'https':
+                self.view.add_phantom(
+                    'specify_https',
+                    cdnContent.sublimeRegion,
+                    """
+                        <body id="CDN-https_warning">
+                            <style>
+                                div.https_warning {{
+                                    background-color: var(--redish);
+                                    color: black;
+                                    padding: 10px;
+                                }}
+                            </style>
+                            <div class="https_warning">
+                                You should load {0} over HTTPS !
+                            </div>
+                        </body>
+                    """.format(cdnContent.name or
+                               '\"' + cdnContent.parsedResult.path
+                               .rpartition('/')[2] + '\"'),
+                    LAYOUT_BLOCK
+                )
+
         # Let's add some regions for the user with specific icons.
         # This is done afterwards to reduce the number of regions drawn.
         for status in ['up_to_date', 'to_update', 'not_found']:
