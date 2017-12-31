@@ -4,7 +4,9 @@ import json
 import re
 from urllib.request import Request, urlopen
 
-from sublime import active_window, load_settings
+from CDNUpdates.CDNUtils import log_message
+
+from sublime import load_settings
 
 
 # This dictionary stores the CDN providers handled as long as their API link.
@@ -194,14 +196,9 @@ class CDNContent():
                 self.status = 'to_update'
 
                 # We'll log something on the console, let's open it !
-                if active_window().active_panel() != 'console':
-                    active_window().run_command(
-                        'show_panel', {'panel': 'console', 'toggle': True}
-                    )
-
-                print('CDNUpdates: You should always specify a version for'
-                      ' your CDN in production. ({})'.format(
-                            self.parsedResult.geturl()))
+                log_message('You should always specify a version for your CDN '
+                            'in production. ({0})'.format(
+                                self.parsedResult.geturl()))
 
         # CDN from (CDN.)?RAWGIT.COM will be handled here.
         elif self.parsedResult.netloc in 'cdn.rawgit.com':
@@ -230,7 +227,7 @@ class CDNContent():
             pass
 
         else:
-            print('CDNUpdates: This statement should not be reached.')
+            log_message('This statement should not be reached.', error=True)
 
     # The methods below are handling interface with the providers' API...
     # ... and version comparison.
@@ -263,7 +260,12 @@ class CDNContent():
 
         else:
             self.status = 'not_found'
-            print('CDNUpdates: You should check your Internet connection.')
+            log_message(
+                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                    request.geturl(),
+                    request.getcode()
+                )
+            )
 
     def compareWithLatestGitHubTag(self, owner, name, version,
                                    fuzzyCheck=False):
@@ -274,7 +276,7 @@ class CDNContent():
         """
 
         # We load the settings file to retrieve a GitHub API token afterwards.
-        self.settings = load_settings('Preferences.sublime-settings')
+        self.settings = load_settings('CDNUpdates.sublime-settings')
 
         request = urlopen(Request(
             'https://api.github.com/repos/{owner}/{name}/tags'.format(
@@ -305,7 +307,12 @@ class CDNContent():
 
         else:
             self.status = 'not_found'
-            print('CDNUpdates: You should check your Internet connection.')
+            log_message(
+                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                    request.geturl(),
+                    request.getcode()
+                )
+            )
 
     def compareWithLatestGitHubRelease(self, owner, name, version,
                                        fuzzyCheck=False):
@@ -316,7 +323,7 @@ class CDNContent():
         """
 
         # We load the settings file to retrieve a GitHub API token afterwards.
-        self.settings = load_settings('Preferences.sublime-settings')
+        self.settings = load_settings('CDNUpdates.sublime-settings')
 
         request = urlopen(Request(
             'https://api.github.com/repos/{owner}/{name}/releases/latest'
@@ -344,7 +351,12 @@ class CDNContent():
 
         else:
             self.status = 'not_found'
-            print('CDNUpdates: You should check your Internet connection.')
+            log_message(
+                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                    request.geturl(),
+                    request.getcode()
+                )
+            )
 
     def compareWithNPMJSVersion(self, name, version):
         request = urlopen(Request(
@@ -377,7 +389,12 @@ class CDNContent():
 
         else:
             self.status = 'not_found'
-            print('CDNUpdates: You should check your Internet connection.')
+            log_message(
+                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                    request.geturl(),
+                    request.getcode()
+                )
+            )
 
     def compareWithLatestWPSVNTag(self, name, version):
         request = urlopen(
@@ -403,4 +420,9 @@ class CDNContent():
 
         else:
             self.status = 'not_found'
-            print('CDNUpdates: You should check your Internet connection.')
+            log_message(
+                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                    request.geturl(),
+                    request.getcode()
+                )
+            )

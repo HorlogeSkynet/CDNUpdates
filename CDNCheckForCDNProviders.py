@@ -2,6 +2,7 @@
 from urllib.parse import urlparse
 
 from CDNUpdates.CDNContent import CDNContent, CDNPROVIDERS
+from CDNUpdates.CDNUtils import log_message
 
 
 class CheckForCDNProviders():
@@ -19,11 +20,14 @@ class CheckForCDNProviders():
                 self.view.substr(region)
             )
 
-            # ... to check if it's a known CDN provider
+            # ... to check if it's a known CDN provider.
             if parsedResult.netloc in CDNPROVIDERS:
                 # If this matches, we store it and move on to the next element.
                 self.cdnContentList.append(CDNContent(region, parsedResult))
 
-            # If not, we'll just ignore this region in the future
+            # If not, we'll just ignore this region in the future.
             else:
-                pass
+                log_message(
+                    '\"{}\" has been detected, but won\'t be handled here.'
+                    .format(parsedResult.netloc)
+                )

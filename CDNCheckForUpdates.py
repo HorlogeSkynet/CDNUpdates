@@ -3,9 +3,11 @@
 import os
 from threading import Thread
 
+from CDNUpdates.CDNUtils import log_message
+
 from sublime import DRAW_EMPTY_AS_OVERWRITE, DRAW_NO_FILL, DRAW_NO_OUTLINE, \
     DRAW_SOLID_UNDERLINE
-from sublime import LAYOUT_BLOCK, active_window, message_dialog
+from sublime import LAYOUT_BLOCK, message_dialog
 
 
 class CheckForUpdates(Thread):
@@ -24,12 +26,7 @@ class CheckForUpdates(Thread):
 
             except OSError as e:
                 # Let's display the console and log an error there.
-                if active_window().active_panel() != 'console':
-                    active_window().run_command(
-                        'show_panel', {'panel': 'console', 'toggle': True}
-                    )
-
-                print('CDNUpdates: An error occurred for \"{}\" ({}).'.format(
+                log_message('An error occurred for \"{}\" ({}).'.format(
                     cdnContent.parsedResult.geturl(),
                     e.reason)
                 )
