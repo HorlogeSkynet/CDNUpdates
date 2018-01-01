@@ -21,7 +21,9 @@ CDNPROVIDERS = [
     'code.ionicframework.com',
     'use.fontawesome.com',
     'opensource.keycdn.com',
-    'cdn.staticfile.org'
+    'cdn.staticfile.org',
+    'ajax.microsoft.com',
+    'ajax.aspnetcdn.com'
 ]
 
 # This regex has been written by @sindresorhus for Semver.
@@ -154,7 +156,6 @@ class CDNContent():
 
             else:
                 self.name = tmp[3]
-
                 self.compareWithLatestGitHubTag(
                     CORRESPONDENCES.get(tmp[3])['owner'],
                     CORRESPONDENCES.get(tmp[3])['name'],
@@ -265,6 +266,86 @@ class CDNContent():
 
             self.name = tmp[1]
             self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
+
+        elif self.parsedResult.netloc in [
+                    'ajax.microsoft.com', 'ajax.aspnetcdn.com'
+                ]:
+
+            tmp = self.parsedResult.path.split('/')
+
+            # Sources : https://docs.microsoft.com/en-us/aspnet/ajax/cdn/
+            CORRESPONDENCES = {
+                'jquery': {
+                    'owner': 'jquery', 'name': 'jquery'
+                },
+                'jquery.migrate': {
+                    'owner': 'jquery', 'name': 'jquery-migrate'
+                },
+                'jquery.ui': {
+                    'owner': 'jquery', 'name': 'jquery-ui'
+                },
+                'jquery.mobile': {
+                    'owner': 'jquery', 'name': 'jquery-mobile'
+                },
+                'jquery.validate': {
+                    'owner': 'jquery-validation', 'name': 'jquery-validation'
+                },
+                'jquery.templates': {
+                    'owner': 'BorisMoore', 'name': 'jquery-tmpl',
+                    'fuzzyCheck': True
+                },
+                'jquery.cycle': {
+                    'owner': 'malsup', 'name': 'cycle2'
+                },
+                'jquery.dataTables': {
+                    'owner': 'dataTables', 'name': 'dataTables'
+                },
+                'jshint': {
+                    'owner': 'jshint', 'name': 'jshint'
+                },
+                'modernizr': {
+                    'owner': 'Modernizr', 'name': 'Modernizr'
+                },
+                'respond': {
+                    'owner': 'scottjehl', 'name': 'Respond'
+                },
+                'globalize': {
+                    'owner': 'globalizejs', 'name': 'globalize'
+                },
+                'knockout': {
+                    'owner': 'knockout', 'name': 'knockout'
+                },
+                'bootstrap': {
+                    'owner': 'twbs', 'name': 'bootstrap'
+                },
+                'bootstrap-touch-carousel': {
+                    'owner': 'ixisio', 'name': 'bootstrap-touch-carousel'
+                },
+                'hammer.js': {
+                    'owner': 'hammerjs', 'name': 'hammer.js'
+                },
+                'signalr': {
+                    'owner': 'SignalR', 'name': 'SignalR'
+                }
+            }
+
+            if tmp[2] not in CORRESPONDENCES.keys():
+                self.status = 'not_found'
+                return
+
+            else:
+                self.name = tmp[2]
+                self.compareWithLatestGitHubTag(
+                    CORRESPONDENCES.get(tmp[2])['owner'],
+                    CORRESPONDENCES.get(tmp[2])['name'],
+                    # Sometimes the version is in the path...
+                    tmp[3] if len(tmp) == 5
+                    # ... and some other times contained within the name.
+                    else re.search(SEMVER_REGEX, tmp[3]).group(0),
+                    # Microsoft has tagged some libraries very badly...
+                    # Check `CORRESPONDENCES` above for this entry.
+                    CORRESPONDENCES.get(tmp[2]).get('fuzzyCheck', False)
+                )
 
         elif False:
             # Additional CDN providers will have to be handled there
