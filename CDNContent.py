@@ -338,7 +338,8 @@ class CDNContent():
             if len(data) >= 1:
                 self.latestVersion = data[0]['name'].lstrip('v')
                 if (not fuzzyCheck and self.latestVersion == version) \
-                        or self.latestVersion.find(version, 0) == 0:
+                        or self.latestVersion.lower().find(
+                            version.lower(), 0) == 0:
 
                     self.status = 'up_to_date'
 
@@ -386,7 +387,8 @@ class CDNContent():
 
             self.latestVersion = data['tag_name'].lstrip('v')
             if (not fuzzyCheck and self.latestVersion == version) \
-                    or self.latestVersion.find(version, 0) == 0:
+                    or self.latestVersion.lower().find(
+                        version.lower(), 0) == 0:
 
                 self.status = 'up_to_date'
 
