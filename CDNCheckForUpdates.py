@@ -77,7 +77,7 @@ class CheckForUpdates(Thread):
                                     }}
                                 </style>
                                 <div class="no_version_found">
-                                    You should specify a version for \"{0}\".
+                                    You should specify a version for <b>{}</b>.
                                 </div>
                             </body>
                         """.format(cdnContent.parsedResult.path
@@ -101,7 +101,7 @@ class CheckForUpdates(Thread):
                                 }}
                             </style>
                             <div class="https_warning">
-                                You should load {0} over HTTPS !
+                                You should load <b>{0}</b> over HTTPS !
                             </div>
                         </body>
                     """.format(cdnContent.name or
