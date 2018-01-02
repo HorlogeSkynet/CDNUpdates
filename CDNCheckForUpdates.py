@@ -129,11 +129,14 @@ class CheckForUpdates(Thread):
         message_dialog('CDNUpdates :{0}{0}'
                        '• {1} CDN already up to date.{0}'
                        '• {2} CDN to update.{0}'
-                       '• {3} CDN not found.'.format(
-                        '\r\n' if os.name == 'nt' else '\n',
+                       '• {3} CDN not found.{0}'
+                       '• {4} CDN not loaded over HTTPS.'.format(
+                        os.linesep,
                         len([i for i in self.cdnContentList
                             if i.status == 'up_to_date']),
                         len([i for i in self.cdnContentList
                             if i.status == 'to_update']),
                         len([i for i in self.cdnContentList
-                            if i.status == 'not_found'])))
+                            if i.status == 'not_found']),
+                        len([i for i in self.cdnContentList
+                            if i.parsedResult.scheme != 'https'])))
