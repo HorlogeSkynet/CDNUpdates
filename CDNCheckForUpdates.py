@@ -105,8 +105,8 @@ class CheckForUpdates(Thread):
                             </div>
                         </body>
                     """.format(cdnContent.name or
-                               '\"' + cdnContent.parsedResult.path
-                               .rpartition('/')[2] + '\"'),
+                               cdnContent.parsedResult.path
+                               .rpartition('/')[2]),
                     LAYOUT_BLOCK
                 )
 
