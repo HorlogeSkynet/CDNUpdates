@@ -4,7 +4,7 @@ import json
 import re
 from urllib.request import Request, urlopen
 
-from CDNUpdates.CDNUtils import log_message
+from CDNUpdates.CDNUtils import SEMVER_REGEX, log_message
 
 from sublime import load_settings
 
@@ -25,10 +25,6 @@ CDNPROVIDERS = [
     'ajax.microsoft.com',
     'ajax.aspnetcdn.com'
 ]
-
-# This regex has been written by @sindresorhus for Semver.
-# (https://github.com/sindresorhus/semver-regex)
-SEMVER_REGEX = 'v?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?'
 
 
 # Simple object to store a CDN element (Sublime.Region + Urllib.ParseResult)

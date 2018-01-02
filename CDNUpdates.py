@@ -3,6 +3,7 @@
 from CDNUpdates.CDNCheckForCDNProviders import CheckForCDNProviders
 from CDNUpdates.CDNCheckForLinks import CheckForLinks
 from CDNUpdates.CDNCheckForUpdates import CheckForUpdates
+from CDNUpdates.CDNUtils import clear_view
 
 from sublime import error_message
 
@@ -56,18 +57,3 @@ class CDNUpdatesCommand(TextCommand):
 class CDNUpdatesListener(EventListener):
     def on_pre_save_async(self, view):
         clear_view(view)
-
-
-def clear_view(view):
-    if view:
-        # We just remove each regions containing icons in the gutter...
-        view.erase_regions('up_to_date')
-        view.erase_regions('to_update')
-        view.erase_regions('not_found')
-
-        # ... and our phantoms objects containing the latest versions...
-        view.erase_phantoms('latest_versions')
-        # ... and "specify version" advices...
-        view.erase_phantoms('specify_versions')
-        # ... and "specify HTTPS" advices.
-        view.erase_phantoms('specify_https')
