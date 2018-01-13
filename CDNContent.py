@@ -5,9 +5,9 @@ import re
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
-from CDNUpdates.CDNUtils import SEMVER_REGEX, log_message
-
 from sublime import load_settings
+
+from .CDNUtils import SEMVER_REGEX, log_message
 
 
 # This dictionary stores the CDN providers handled as long as their API link.

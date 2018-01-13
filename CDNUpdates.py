@@ -1,13 +1,13 @@
 
 
-from CDNUpdates.CDNCheckForCDNProviders import CheckForCDNProviders
-from CDNUpdates.CDNCheckForLinks import CheckForLinks
-from CDNUpdates.CDNCheckForUpdates import CheckForUpdates
-from CDNUpdates.CDNUtils import clear_view
-
 from sublime import error_message
 
 from sublime_plugin import EventListener, TextCommand
+
+from .CDNCheckForCDNProviders import CheckForCDNProviders
+from .CDNCheckForLinks import CheckForLinks
+from .CDNCheckForUpdates import CheckForUpdates
+from .CDNUtils import clear_view
 
 
 class CDNUpdatesCommand(TextCommand):

@@ -3,11 +3,11 @@
 import os
 from threading import Thread
 
-from CDNUpdates.CDNUtils import log_message
-
 from sublime import DRAW_EMPTY_AS_OVERWRITE, DRAW_NO_FILL, DRAW_NO_OUTLINE, \
     DRAW_SOLID_UNDERLINE
 from sublime import LAYOUT_BLOCK, message_dialog
+
+from .CDNUtils import log_message
 
 
 class CheckForUpdates(Thread):

@@ -1,8 +1,8 @@
 
 
-from CDNUpdates.CDNUtils import LINK_REGEX
-
 from sublime import IGNORECASE
+
+from .CDNUtils import LINK_REGEX
 
 
 class CheckForLinks():
