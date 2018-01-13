@@ -2,6 +2,7 @@
 
 import json
 import re
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 from CDNUpdates.CDNUtils import SEMVER_REGEX, log_message
@@ -356,7 +357,7 @@ class CDNContent():
         # We ask CDNJS API to retrieve information about this library.
         request = urlopen(
             'https://api.cdnjs.com/libraries?search={name}&fields=version'
-            .format(name=name)
+            .format(name=quote(name))
         )
 
         # If the request was a success...
@@ -401,8 +402,8 @@ class CDNContent():
 
         request = urlopen(Request(
             'https://api.github.com/repos/{owner}/{name}/tags'.format(
-                owner=owner,
-                name=name),
+                owner=quote(owner),
+                name=quote(name)),
             headers={
                 'Authorization': 'token ' +
                 self.settings.get('github_api_token')
@@ -450,8 +451,8 @@ class CDNContent():
         request = urlopen(Request(
             'https://api.github.com/repos/{owner}/{name}/releases/latest'
             .format(
-                owner=owner,
-                name=name
+                owner=quote(owner),
+                name=quote(name)
             ),
             headers={
                 'Authorization': 'token ' +
@@ -483,7 +484,7 @@ class CDNContent():
 
     def compareWithNPMJSVersion(self, name, version):
         request = urlopen(Request(
-            'https://api.npms.io/v2/search?q={name}'.format(name=name),
+            'https://api.npms.io/v2/search?q={name}'.format(name=quote(name)),
             # The API of NPMJS blocks the scripts, we need to spoof a real UA.
             headers={
                 'User-Agent': 'Mozilla/5.0(X11; U; Linux i686) '
@@ -521,7 +522,9 @@ class CDNContent():
 
     def compareWithLatestWPSVNTag(self, name, version):
         request = urlopen(
-            'https://plugins.svn.wordpress.org/{name}/tags/'.format(name=name)
+            'https://plugins.svn.wordpress.org/{name}/tags/'.format(
+                name=quote(name)
+            )
         )
 
         if request.getcode() == 200:
