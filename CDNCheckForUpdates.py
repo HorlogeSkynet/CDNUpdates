@@ -118,9 +118,7 @@ class CheckForUpdates(Thread):
                 [cdnContent.sublimeRegion for cdnContent in self.cdnContentList
                     if cdnContent.status == status],
                 'text',
-                'Packages{0}CDNUpdates{0}Icons{0}{1}.png'.format(
-                    os.sep, status
-                ),
+                'Packages/CDNUpdates/Icons/{0}.png'.format(status),
                 DRAW_EMPTY_AS_OVERWRITE | DRAW_NO_FILL | DRAW_NO_OUTLINE |
                 DRAW_SOLID_UNDERLINE
             )
