@@ -2,7 +2,7 @@
 
 > A Sublime Text 3 plugin to check for CDN updates in your Web sources
 
-![Preview](https://i.imgur.com/hYZHIui.png)
+![Preview](https://i.imgur.com/WrxQApP.png)
 
 Tired of manually checking if your CDN (_Content Delivery Network_) are up to date in your web pages ? Yeah, so was I... :confused:
 
@@ -21,19 +21,21 @@ Of course, when this plugin does not use the API of the CDN provider, it may inf
 
 ### With Package Control
 
-Coming soon...
+1. Open your command palette and type in : `Package Control: Install Package`
+2. Browse the list or search for `CDNUpdates`
+3. Press `Enter` and you're done !
+
+Package Control dedicated page [here](https://packagecontrol.io/packages/CDNUpdates).
 
 ### Manually
 
-1. Move into your Sublime Text packages folder (usually under `$HOME/.config/sublime-text-3/`)
+1. Move into your Sublime Text packages folder (usually under `$HOME/.config/sublime-text-3/` or `C:\Documents and Settings\$USER\Application Data\Sublime Text 3\`)
 2. Clone this repository there : `$ git clone https://github.com/HorlogeSkynet/CDNUpdates.git`
 3. Restart Sublime Text and... :tada:
 
 ## Usage
 
 * Open your command palette and type in : `CDNUpdates`
-
-* Press `CTRL + SHIFT + C`
 
 * Right click on your file : `CDNUpdates > ...`
 
