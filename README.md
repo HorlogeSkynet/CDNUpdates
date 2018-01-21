@@ -4,6 +4,8 @@
 
 ![Preview](https://i.imgur.com/WrxQApP.png)
 
+## Introduction
+
 Tired of manually checking if your CDN (_Content Delivery Network_) are up to date in your web pages ? Yeah, so was I... :confused:
 
 This is what this Sublime Text 3 plugin does (well) to help you dealing with this :
@@ -29,7 +31,7 @@ Package Control dedicated page [here](https://packagecontrol.io/packages/CDNUpda
 
 ### Manually
 
-1. Move into your Sublime Text packages folder (usually under `$HOME/.config/sublime-text-3/` or `C:\Documents and Settings\$USER\Application Data\Sublime Text 3\`)
+1. Move into Sublime Text packages folder (usually `$HOME/.config/sublime-text-3/Packages/` or `%AppData%\Sublime Text 3\Packages\`)
 2. Clone this repository there : `$ git clone https://github.com/HorlogeSkynet/CDNUpdates.git`
 3. Restart Sublime Text and... :tada:
 
