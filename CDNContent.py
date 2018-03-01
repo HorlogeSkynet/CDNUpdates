@@ -24,7 +24,8 @@ CDNPROVIDERS = [
     'opensource.keycdn.com',
     'cdn.staticfile.org',
     'ajax.microsoft.com',
-    'ajax.aspnetcdn.com'
+    'ajax.aspnetcdn.com',
+    'cdn.ckeditor.com'
 ]
 
 
@@ -343,6 +344,19 @@ class CDNContent():
                     # Check `CORRESPONDENCES` above for this entry.
                     CORRESPONDENCES.get(tmp[2]).get('fuzzyCheck', False)
                 )
+
+        elif self.parsedResult.netloc == 'cdn.ckeditor.com':
+            tmp = self.parsedResult.path.split('/')
+
+            if tmp[1] == 'ckeditor5' and \
+               tmp[3] in ['classic', 'inline', 'balloon']:
+
+                self.name = '{0} ({1})'.format(tmp[1], tmp[3])
+                self.compareWithLatestGitHubRelease('ckeditor', tmp[1], tmp[2])
+
+            else:
+                self.status = 'not_found'
+                return
 
         elif False:
             # Additional CDN providers will have to be handled there
