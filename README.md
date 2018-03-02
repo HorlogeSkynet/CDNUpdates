@@ -63,6 +63,7 @@ You can generate one [here](https://github.com/settings/tokens), and paste in un
 * [X] <https://www.keycdn.com/> (partially)
 * [X] <https://www.staticfile.org/>
 * [X] <https://ajax.aspnetcdn.com/> (partially)
+* [X] <https://cdn.ckeditor.com>
 
 ## Frequently Asked Questions
 
