@@ -8,7 +8,7 @@
 
 Tired of manually checking if your CDN (_Content Delivery Network_) are up to date in your web pages ? Yeah, so was I... :confused:
 
-This is what this Sublime Text 3 plugin does (well) to help you dealing with this :
+Below is a sum-up of what this Sublime Text 3 plugin does (well) to help you dealing about that :
 
 1. Gathers links present in your current sheet
 2. Compares them to a list containing known public CDN providers
@@ -17,7 +17,7 @@ This is what this Sublime Text 3 plugin does (well) to help you dealing with thi
 5. Displays a _Phantom_ object with the latest version available you should be using
 6. _Bonus_ : Shows up a warning for resources not loaded over HTTPS :+1:
 
-Of course, when this plugin does not use the API of the CDN provider, it may informs you of a newer published version, possibly not available from your provider (maybe it's time to opt out from this privacy mess ? :wink:).
+Of course, when this plugin does not use the API of the CDN provider, it may inform you of a newer published version, possibly not available from your provider (maybe it's time to opt out from this privacy mess ? :wink:).
 
 ## Installation
 
@@ -46,7 +46,7 @@ Package Control dedicated page [here](https://packagecontrol.io/packages/CDNUpda
 ## Settings
 
 Most of the CDN providers don't provide any API for their service, so it would be very tricky to retrieve latest version available directly from them.  
-Unless for <https://cdnjs.com/>, this plugin is actually based on the GitHub API to fetch from repositories the latest existing Git tag. Its `name` is compared afterwards with the CDN version present in your sources.  
+Unless for <https://cdnjs.com/>, this plugin is actually based on the GitHub API to fetch the latest existing Git tag directly from the repositories. Its `name` is compared afterwards with the CDN version present in your sources.  
 If you have many many CDNs in your sheets (or if you want to contribute to this project 😜), you'll surely need to set a GitHub API token to avoid being blocked by the rate limit.  
 You can generate one [here](https://github.com/settings/tokens), and paste in under the plugin preferences (accessible from `CDNUpdates`'s Sublime menu).
 
