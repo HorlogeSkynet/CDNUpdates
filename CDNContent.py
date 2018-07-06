@@ -376,20 +376,23 @@ class CDNContent():
 
         # If the request was a success...
         if request.getcode() == 200:
-            # ... we fetch and decode the data from the payload
+            # ... we fetch and decode the data from the payload.
             data = json.loads(request.read().decode())
 
-            # If there is at least one result, which matches our library...
-            if data['total'] >= 1 and data['results'][0]['name'] == name:
-                # We set here its name and version for future usages.
-                self.latestVersion = data['results'][0]['version']
+            # We iterate on the results until we encounter a matching name.
+            for result in data['results']:
+                if result['name'] == name:
+                    # We set here its name and version for future usages.
+                    self.latestVersion = result['version']
 
-                # ... let's compare its version with ours !
-                if self.latestVersion == version:
-                    self.status = 'up_to_date'
+                    # ... let's compare its version with ours !
+                    if self.latestVersion == version:
+                        self.status = 'up_to_date'
 
-                else:
-                    self.status = 'to_update'
+                    else:
+                        self.status = 'to_update'
+
+                    break
 
             else:
                 self.status = 'not_found'
