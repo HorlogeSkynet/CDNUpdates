@@ -29,8 +29,28 @@ CDN_PROVIDERS = [
     'cdn.ckeditor.com'
 ]
 
-# The CDNs provided by Google are well "formatted".
-# This dictionary will only store the "correspondences" with GitHub repositories.
+# The dictionaries below will store the "correspondences" between project names and...
+# ... GitHub repositories identities (owner / name).
+# This allows us to fetch latest version from GitHub when a provider does not offer any API.
+MAXCDN_BOOTSTRAP_CORRESPONDENCES = {
+    'bootstrap': {
+        'owner': 'twbs',
+        'name': 'bootstrap'
+    },
+    'font-awesome': {
+        'owner': 'FortAwesome',
+        'name': 'Font-Awesome'
+    },
+    'bootlint': {
+        'owner': 'twbs',
+        'name': 'bootlint'
+    },
+    'bootswatch': {
+        'owner': 'thomaspark',
+        'name': 'bootswatch'
+    }
+}
+
 AJAX_GOOGLE_APIS_CORRESPONDENCES = {
     'dojo': {
         'owner': 'dojo',
@@ -98,7 +118,36 @@ AJAX_GOOGLE_APIS_CORRESPONDENCES = {
     }
 }
 
-# This one will store the "correspondences" with GitHub repositories for Microsoft's CDNs.
+OPENSOURCE_KEYCDN_CORRESPONDENCES = {
+    'fontawesome': {
+        'owner': 'FortAwesome',
+        'name': 'Font-Awesome'
+    },
+    'pure': {
+        'owner': 'yahoo',
+        'name': 'pure'
+    }
+}
+
+CDN_STATIC_FILE_CORRESPONDENCES = {
+    'react': {
+        'owner': 'facebook',
+        'name': 'react'
+    },
+    'vue': {
+        'owner': 'vuejs',
+        'name': 'vue'
+    },
+    'angular.js': {
+        'owner': 'angular',
+        'name': 'angular.js'
+    },
+    'jquery': {
+        'owner': 'jquery',
+        'name': 'jquery'
+    }
+}
+
 # Sources : <https://docs.microsoft.com/en-us/aspnet/ajax/cdn/>
 AJAX_MICROSOFT_CORRESPONDENCES = {
     'jquery': {

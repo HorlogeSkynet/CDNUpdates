@@ -10,6 +10,9 @@ from sublime import load_settings
 from .CDNConstants import (
     AJAX_GOOGLE_APIS_CORRESPONDENCES,
     AJAX_MICROSOFT_CORRESPONDENCES,
+    CDN_STATIC_FILE_CORRESPONDENCES,
+    MAXCDN_BOOTSTRAP_CORRESPONDENCES,
+    OPENSOURCE_KEYCDN_CORRESPONDENCES,
     SEMVER_REGEX
 )
 from .CDNUtils import log_message
@@ -56,25 +59,16 @@ class CDNContent:
         elif self.parsed_result.netloc == 'maxcdn.bootstrapcdn.com':
             tmp = self.parsed_result.path.split('/')
             self.name = tmp[1]
-
-            if tmp[1] == 'bootstrap':
-                owner = 'twbs'
-
-            elif tmp[1] == 'font-awesome':
-                owner, self.name = 'FortAwesome', 'Font-Awesome'
-
-            elif tmp[1] == 'bootlint':
-                owner = 'twbs'
-
-            elif tmp[1] == 'bootswatch':
-                owner = 'thomaspark'
-
-            else:
-                # We don't know such a content delivered by BOOTSTRAPCDN.COM...
+            if self.name not in MAXCDN_BOOTSTRAP_CORRESPONDENCES.keys():
+                log_message("{0} is not known to be delivered by this provider.".format(self.name))
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(owner, self.name, tmp[2])
+            self.compare_with_latest_github_tag(
+                MAXCDN_BOOTSTRAP_CORRESPONDENCES.get(self.name)['owner'],
+                MAXCDN_BOOTSTRAP_CORRESPONDENCES.get(self.name)['name'],
+                tmp[2]
+            )
 
         # CDN from CODE.JQUERY.COM will be handled here.
         elif self.parsed_result.netloc == 'code.jquery.com':
@@ -124,8 +118,9 @@ class CDNContent:
         # CDN from CDN.JSDLIVR.NET will be handled here.
         elif self.parsed_result.netloc == 'cdn.jsdelivr.net':
             """
-            The API from JSDLIVR is powerful. It implies we compute a
-              "fuzzy" version checking (ex: 'jquery@3' is OK for '3.2.1')
+            The API from JSDLIVR is powerful.
+            It implies we compute a "fuzzy" version checking.
+            For instance : "jquery@3" is OK for '3.2.1'.
             """
             tmp = self.parsed_result.path.split('/')
 
@@ -186,51 +181,33 @@ class CDNContent:
 
         elif self.parsed_result.netloc == 'opensource.keycdn.com':
             tmp = self.parsed_result.path.split('/')
-
-            if tmp[1] == 'fontawesome':
-                owner, self.name = 'FortAwesome', 'Font-Awesome'
-
-            elif tmp[1] == 'pure':
-                owner, self.name = 'yahoo', tmp[1]
-
-            elif tmp[1] == 'angularjs' or True:
-                # Sorry but we can't really handle these cases...
-                log_message("{0} is currently not handled for this provider.".format(tmp[1]))
+            self.name = tmp[1]
+            if self.name not in OPENSOURCE_KEYCDN_CORRESPONDENCES.keys():
+                log_message("{0} is currently not handled for this provider.".format(self.name))
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(owner, self.name, tmp[2])
+            self.compare_with_latest_github_tag(
+                OPENSOURCE_KEYCDN_CORRESPONDENCES.get(self.name)['owner'],
+                OPENSOURCE_KEYCDN_CORRESPONDENCES.get(self.name)['name'],
+                tmp[2]
+            )
 
         elif self.parsed_result.netloc == 'cdn.staticfile.org':
             tmp = self.parsed_result.path.split('/')
-
-            if tmp[1] == 'react':
-                owner = 'facebook'
-
-            elif tmp[1] == 'vue':
-                owner = 'vuejs'
-
-            elif tmp[1] == 'angular.js':
-                owner = 'angular'
-
-            elif tmp[1] == 'jquery':
-                owner = 'jquery'
-
-            else:
-                log_message(
-                    "{0} is currently not handled for this provider.".format(
-                        tmp[1]
-                    )
-                )
+            self.name = tmp[1]
+            if self.name not in CDN_STATIC_FILE_CORRESPONDENCES.keys():
+                log_message("{0} is currently not handled for this provider.".format(self.name))
                 self.status = 'not_found'
                 return
 
-            self.name = tmp[1]
-            self.compare_with_latest_github_tag(owner, self.name, tmp[2])
+            self.compare_with_latest_github_tag(
+                CDN_STATIC_FILE_CORRESPONDENCES.get(self.name)['owner'],
+                CDN_STATIC_FILE_CORRESPONDENCES.get(self.name)['name'],
+                tmp[2]
+            )
 
-        elif self.parsed_result.netloc in [
-                'ajax.microsoft.com', 'ajax.aspnetcdn.com'
-            ]:
+        elif self.parsed_result.netloc in ['ajax.microsoft.com', 'ajax.aspnetcdn.com']:
             tmp = self.parsed_result.path.split('/')
             if tmp[2] not in AJAX_MICROSOFT_CORRESPONDENCES.keys():
                 self.status = 'not_found'
