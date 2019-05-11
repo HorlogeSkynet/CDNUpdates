@@ -2,7 +2,8 @@
 
 from urllib.parse import urlparse
 
-from .CDNContent import CDNContent, CDNPROVIDERS
+from .CDNConstants import CDN_PROVIDERS
+from .CDNContent import CDNContent
 from .CDNUtils import log_message
 
 
@@ -22,7 +23,7 @@ class CheckForCDNProviders:  # pylint: disable=too-few-public-methods
             parsed_result = urlparse(self.view.substr(region))
 
             # ... to check if it's a known CDN provider.
-            if parsed_result.netloc in CDNPROVIDERS:
+            if parsed_result.netloc in CDN_PROVIDERS:
                 # If this matches, we store it and move on to the next element.
                 self.cdn_content_list.append(CDNContent(region, parsed_result))
 

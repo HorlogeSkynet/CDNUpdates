@@ -7,26 +7,12 @@ from urllib.request import Request, urlopen
 
 from sublime import load_settings
 
-from .CDNUtils import SEMVER_REGEX, log_message
-
-
-# This list stores the API links of handled CDN providers.
-CDNPROVIDERS = [
-    'cdnjs.cloudflare.com',
-    'maxcdn.bootstrapcdn.com',
-    'code.jquery.com',
-    'ajax.googleapis.com',
-    'cdn.jsdelivr.net',
-    'rawgit.com',
-    'cdn.rawgit.com',
-    'code.ionicframework.com',
-    'use.fontawesome.com',
-    'opensource.keycdn.com',
-    'cdn.staticfile.org',
-    'ajax.microsoft.com',
-    'ajax.aspnetcdn.com',
-    'cdn.ckeditor.com'
-]
+from .CDNConstants import (
+    AJAX_GOOGLE_APIS_CORRESPONDENCES,
+    AJAX_MICROSOFT_CORRESPONDENCES,
+    SEMVER_REGEX
+)
+from .CDNUtils import log_message
 
 
 class CDNContent:
@@ -124,46 +110,14 @@ class CDNContent:
         # CDN from AJAX.GOOGLEAPIS.COM will be handled here.
         elif self.parsed_result.netloc == 'ajax.googleapis.com':
             tmp = self.parsed_result.path.split('/')
-
-            # The CDNs provided by Google are well "formatted".
-            # This dictionary will only store the "correspondences" with...
-            # ... GitHub repositories.
-            correspondences = {
-                'dojo': {'owner': 'dojo', 'name': 'dojo'},
-                'ext-core': {'owner': 'ExtCore', 'name': 'ExtCore'},
-                'hammerjs': {'owner': 'hammerjs', 'name': 'hammer.js'},
-                'indefinite-observable': {
-                    'owner': 'material-motion',
-                    'name':  'indefinite-observable-js'
-                },
-                'jquery':       {'owner': 'jquery', 'name': 'jquery'},
-                'jquerymobile': {'owner': 'jquery', 'name': 'jquery-mobile'},
-                'jqueryui':     {'owner': 'jquery', 'name': 'jquery-ui'},
-                'mootools': {'owner': 'mootools', 'name': 'mootools-core'},
-                'myanmar-tools': {
-                    'owner': 'googlei18n',
-                    'name': 'myanmar-tools'
-                },
-                'prototype': {'owner': 'sstephenson', 'name': 'prototype'},
-                'scriptaculous': {
-                    'owner': 'madrobby',
-                    'name': 'scriptaculous'
-                },
-                'shaka-player': {'owner': 'google', 'name': 'shaka-player'},
-                'spf': {'owner': 'youtube', 'name': 'spfjs'},
-                'swfobject': {'owner': 'swfobject', 'name': 'swfobject'},
-                'threejs': {'owner': 'mrdoob', 'name': 'three.js'},
-                'webfont': {'owner': 'typekit', 'name': 'webfontloader'}
-            }
-
             self.name = tmp[3]
-            if self.name not in correspondences.keys():
+            if self.name not in AJAX_GOOGLE_APIS_CORRESPONDENCES.keys():
                 self.status = 'not_found'
                 return
 
             self.compare_with_latest_github_tag(
-                correspondences.get(self.name)['owner'],
-                correspondences.get(self.name)['name'],
+                AJAX_GOOGLE_APIS_CORRESPONDENCES.get(self.name)['owner'],
+                AJAX_GOOGLE_APIS_CORRESPONDENCES.get(self.name)['name'],
                 tmp[4]
             )
 
@@ -277,80 +231,22 @@ class CDNContent:
         elif self.parsed_result.netloc in [
                 'ajax.microsoft.com', 'ajax.aspnetcdn.com'
             ]:
-
             tmp = self.parsed_result.path.split('/')
-
-            # Sources : https://docs.microsoft.com/en-us/aspnet/ajax/cdn/
-            correspondences = {
-                'jquery': {
-                    'owner': 'jquery', 'name': 'jquery'
-                },
-                'jquery.migrate': {
-                    'owner': 'jquery', 'name': 'jquery-migrate'
-                },
-                'jquery.ui': {
-                    'owner': 'jquery', 'name': 'jquery-ui'
-                },
-                'jquery.mobile': {
-                    'owner': 'jquery', 'name': 'jquery-mobile'
-                },
-                'jquery.validate': {
-                    'owner': 'jquery-validation', 'name': 'jquery-validation'
-                },
-                'jquery.templates': {
-                    'owner': 'BorisMoore', 'name': 'jquery-tmpl',
-                    'fuzzy_check': True
-                },
-                'jquery.cycle': {
-                    'owner': 'malsup', 'name': 'cycle2'
-                },
-                'jquery.dataTables': {
-                    'owner': 'dataTables', 'name': 'dataTables'
-                },
-                'jshint': {
-                    'owner': 'jshint', 'name': 'jshint'
-                },
-                'modernizr': {
-                    'owner': 'Modernizr', 'name': 'Modernizr'
-                },
-                'respond': {
-                    'owner': 'scottjehl', 'name': 'Respond'
-                },
-                'globalize': {
-                    'owner': 'globalizejs', 'name': 'globalize'
-                },
-                'knockout': {
-                    'owner': 'knockout', 'name': 'knockout'
-                },
-                'bootstrap': {
-                    'owner': 'twbs', 'name': 'bootstrap'
-                },
-                'bootstrap-touch-carousel': {
-                    'owner': 'ixisio', 'name': 'bootstrap-touch-carousel'
-                },
-                'hammer.js': {
-                    'owner': 'hammerjs', 'name': 'hammer.js'
-                },
-                'signalr': {
-                    'owner': 'SignalR', 'name': 'SignalR'
-                }
-            }
-
-            if tmp[2] not in correspondences.keys():
+            if tmp[2] not in AJAX_MICROSOFT_CORRESPONDENCES.keys():
                 self.status = 'not_found'
                 return
 
             self.name = tmp[2]
             self.compare_with_latest_github_tag(
-                correspondences.get(tmp[2])['owner'],
-                correspondences.get(tmp[2])['name'],
+                AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2])['owner'],
+                AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2])['name'],
                 # Sometimes the version is in the path...
                 tmp[3] if len(tmp) == 5
                 # ... and some other times contained within the name.
                 else re.search(SEMVER_REGEX, tmp[3]).group(0),
                 # Microsoft has tagged some libraries very badly...
-                # Check `correspondences` above for this entry.
-                correspondences.get(tmp[2]).get('fuzzy_check', False)
+                # Check `CDNConstants.AJAX_MICROSOFT_CORRESPONDENCES` for this entry.
+                AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2]).get('fuzzy_check', False)
             )
 
         elif self.parsed_result.netloc == 'cdn.ckeditor.com':

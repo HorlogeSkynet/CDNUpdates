@@ -2,7 +2,7 @@
 
 from sublime import IGNORECASE
 
-from .CDNUtils import LINK_REGEX
+from .CDNConstants import LINK_REGEX
 
 
 class CheckForLinks:  # pylint: disable=too-few-public-methods
