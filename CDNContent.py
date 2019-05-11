@@ -1,4 +1,4 @@
-
+"""CDNUpdates' main logic"""
 
 import json
 import re
@@ -10,7 +10,7 @@ from sublime import load_settings
 from .CDNUtils import SEMVER_REGEX, log_message
 
 
-# This dictionary stores the CDN providers handled as long as their API link.
+# This list stores the API links of handled CDN providers.
 CDNPROVIDERS = [
     'cdnjs.cloudflare.com',
     'maxcdn.bootstrapcdn.com',
@@ -29,11 +29,16 @@ CDNPROVIDERS = [
 ]
 
 
-# Simple object to store a CDN element (Sublime.Region + Urllib.ParseResult)
-class CDNContent():
-    def __init__(self, region, parsedResult):
-        self.sublimeRegion = region
-        self.parsedResult = parsedResult
+class CDNContent:
+    """
+    This class run verifies whether found CDN are up to date.
+    Checks (try to) rely on the CDN provider's API, or on GitHub directly.
+    It also stores the results (Sublime.Region + Urllib.ParseResult) for future usages.
+    """
+
+    def __init__(self, region, parsed_result):
+        self.sublime_region = region
+        self.parsed_result = parsed_result
 
         # This variable will store a status as the ones below :
         # ('up_to_date', 'to_update', 'not_found')
@@ -41,9 +46,12 @@ class CDNContent():
 
         # These variables will store the final information of this CDN.
         self.name = None
-        self.latestVersion = None
+        self.latest_version = None
 
-    def handleProvider(self):
+        # We load the settings file to retrieve a GitHub API token afterwards.
+        self.settings = load_settings('CDNUpdates.sublime-settings')
+
+    def handle_provider(self):  # pylint: disable=too-many-statements, too-many-return-statements, too-many-branches
         """
         This is the most important method of CDNUpdates.
         This is where are comparing the versions in function of the provider...
@@ -51,16 +59,16 @@ class CDNContent():
         """
 
         # CDNJS.com will be handled here.
-        if self.parsedResult.netloc == 'cdnjs.cloudflare.com':
+        if self.parsed_result.netloc == 'cdnjs.cloudflare.com':
             # We temporally store the result of the path split around '/'.
             # The library name will be in `[3]`, and its version in `[4]`.
-            tmp = self.parsedResult.path.split('/')
+            tmp = self.parsed_result.path.split('/')
             self.name = tmp[3]
 
-            self.compareWithLatestCDNJSVersion(self.name, tmp[4])
+            self.compare_with_latest_cdnjs_version(self.name, tmp[4])
 
-        elif self.parsedResult.netloc == 'maxcdn.bootstrapcdn.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'maxcdn.bootstrapcdn.com':
+            tmp = self.parsed_result.path.split('/')
             self.name = tmp[1]
 
             if tmp[1] == 'bootstrap':
@@ -80,11 +88,11 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
-            self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
+            self.compare_with_latest_github_tag(owner, self.name, tmp[2])
 
         # CDN from CODE.JQUERY.COM will be handled here.
-        elif self.parsedResult.netloc == 'code.jquery.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'code.jquery.com':
+            tmp = self.parsed_result.path.split('/')
 
             if tmp[1].startswith('jquery'):
                 self.name = 'jquery'
@@ -106,7 +114,7 @@ class CDNContent():
                 self.status = 'not_found'
                 return
 
-            self.compareWithLatestGitHubTag(
+            self.compare_with_latest_github_tag(
                 # Only `QUnit` belongs to another organization.
                 ('qunitjs' if self.name == 'qunit' else 'jquery'),
                 self.name,
@@ -114,13 +122,13 @@ class CDNContent():
             )
 
         # CDN from AJAX.GOOGLEAPIS.COM will be handled here.
-        elif self.parsedResult.netloc == 'ajax.googleapis.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'ajax.googleapis.com':
+            tmp = self.parsed_result.path.split('/')
 
             # The CDNs provided by Google are well "formatted".
             # This dictionary will only store the "correspondences" with...
             # ... GitHub repositories.
-            CORRESPONDENCES = {
+            correspondences = {
                 'dojo': {'owner': 'dojo', 'name': 'dojo'},
                 'ext-core': {'owner': 'ExtCore', 'name': 'ExtCore'},
                 'hammerjs': {'owner': 'hammerjs', 'name': 'hammer.js'},
@@ -148,35 +156,36 @@ class CDNContent():
                 'webfont': {'owner': 'typekit', 'name': 'webfontloader'}
             }
 
-            if tmp[3] not in CORRESPONDENCES.keys():
+            self.name = tmp[3]
+            if self.name not in correspondences.keys():
                 self.status = 'not_found'
                 return
 
-            else:
-                self.name = tmp[3]
-                self.compareWithLatestGitHubTag(
-                    CORRESPONDENCES.get(tmp[3])['owner'],
-                    CORRESPONDENCES.get(tmp[3])['name'],
-                    tmp[4]
-                )
+            self.compare_with_latest_github_tag(
+                correspondences.get(self.name)['owner'],
+                correspondences.get(self.name)['name'],
+                tmp[4]
+            )
 
         # CDN from CDN.JSDLIVR.NET will be handled here.
-        elif self.parsedResult.netloc == 'cdn.jsdelivr.net':
+        elif self.parsed_result.netloc == 'cdn.jsdelivr.net':
             """
             The API from JSDLIVR is powerful. It implies we compute a
               "fuzzy" version checking (ex: 'jquery@3' is OK for '3.2.1')
             """
-            tmp = self.parsedResult.path.split('/')
+            tmp = self.parsed_result.path.split('/')
 
             try:
                 if tmp[1] == 'npm':
                     self.name, version = tmp[2].split('@')
-                    self.compareWithNPMJSVersion(self.name, version)
+                    self.compare_with_npmjs_version(self.name, version)
 
                 elif tmp[1] == 'gh':
                     self.name, version = tmp[3].split('@')
-                    self.compareWithLatestGitHubTag(tmp[2], self.name, version,
-                                                    fuzzyCheck=True)
+                    self.compare_with_latest_github_tag(
+                        tmp[2], self.name, version,
+                        fuzzy_check=True
+                    )
 
                 elif tmp[1] == 'wp':
                     # This how we'll handle the latest version references, as :
@@ -185,7 +194,7 @@ class CDNContent():
                         raise IndexError
 
                     self.name = tmp[2]
-                    self.compareWithLatestWPSVNTag(self.name, tmp[4])
+                    self.compare_with_latest_wpsvn_tag(self.name, tmp[4])
 
                 else:
                     self.status = 'not_found'
@@ -196,8 +205,8 @@ class CDNContent():
                 self.status = 'to_update'
 
         # CDN from (CDN.)?RAWGIT.COM will be handled here.
-        elif self.parsedResult.netloc in 'cdn.rawgit.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc in 'cdn.rawgit.com':
+            tmp = self.parsed_result.path.split('/')
             self.name = tmp[2]
 
             # If no semantic version is specified in the URL, we assume either:
@@ -208,23 +217,21 @@ class CDNContent():
 
             else:
                 # If not, we compare this version with the latest tag !
-                self.compareWithLatestGitHubTag(tmp[1], self.name, tmp[3])
+                self.compare_with_latest_github_tag(tmp[1], self.name, tmp[3])
 
-        elif self.parsedResult.netloc == 'code.ionicframework.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'code.ionicframework.com':
+            tmp = self.parsed_result.path.split('/')
             self.name = tmp[1]
+            self.compare_with_latest_github_release('ionic-team', self.name, tmp[2])
 
-            self.compareWithLatestGitHubRelease('ionic-team', self.name,
-                                                tmp[2])
-
-        elif self.parsedResult.netloc == 'use.fontawesome.com':
+        elif self.parsed_result.netloc == 'use.fontawesome.com':
             self.name = 'Font Awesome'
 
             # We assume here that FA's CDN always serves the latest version.
             self.status = 'up_to_date'
 
-        elif self.parsedResult.netloc == 'opensource.keycdn.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'opensource.keycdn.com':
+            tmp = self.parsed_result.path.split('/')
 
             if tmp[1] == 'fontawesome':
                 owner, self.name = 'FortAwesome', 'Font-Awesome'
@@ -234,15 +241,14 @@ class CDNContent():
 
             elif tmp[1] == 'angularjs' or True:
                 # Sorry but we can't really handle these cases...
-                log_message('{0} is currently not handled for this provider.'
-                            .format(tmp[1]))
+                log_message("{0} is currently not handled for this provider.".format(tmp[1]))
                 self.status = 'not_found'
                 return
 
-            self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
+            self.compare_with_latest_github_tag(owner, self.name, tmp[2])
 
-        elif self.parsedResult.netloc == 'cdn.staticfile.org':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'cdn.staticfile.org':
+            tmp = self.parsed_result.path.split('/')
 
             if tmp[1] == 'react':
                 owner = 'facebook'
@@ -257,22 +263,25 @@ class CDNContent():
                 owner = 'jquery'
 
             else:
-                log_message('{0} is currently not handled for this provider.'
-                            .format(tmp[1]))
+                log_message(
+                    "{0} is currently not handled for this provider.".format(
+                        tmp[1]
+                    )
+                )
                 self.status = 'not_found'
                 return
 
             self.name = tmp[1]
-            self.compareWithLatestGitHubTag(owner, self.name, tmp[2])
+            self.compare_with_latest_github_tag(owner, self.name, tmp[2])
 
-        elif self.parsedResult.netloc in [
-                    'ajax.microsoft.com', 'ajax.aspnetcdn.com'
-                ]:
+        elif self.parsed_result.netloc in [
+                'ajax.microsoft.com', 'ajax.aspnetcdn.com'
+            ]:
 
-            tmp = self.parsedResult.path.split('/')
+            tmp = self.parsed_result.path.split('/')
 
             # Sources : https://docs.microsoft.com/en-us/aspnet/ajax/cdn/
-            CORRESPONDENCES = {
+            correspondences = {
                 'jquery': {
                     'owner': 'jquery', 'name': 'jquery'
                 },
@@ -290,7 +299,7 @@ class CDNContent():
                 },
                 'jquery.templates': {
                     'owner': 'BorisMoore', 'name': 'jquery-tmpl',
-                    'fuzzyCheck': True
+                    'fuzzy_check': True
                 },
                 'jquery.cycle': {
                     'owner': 'malsup', 'name': 'cycle2'
@@ -327,51 +336,48 @@ class CDNContent():
                 }
             }
 
-            if tmp[2] not in CORRESPONDENCES.keys():
+            if tmp[2] not in correspondences.keys():
                 self.status = 'not_found'
                 return
 
-            else:
-                self.name = tmp[2]
-                self.compareWithLatestGitHubTag(
-                    CORRESPONDENCES.get(tmp[2])['owner'],
-                    CORRESPONDENCES.get(tmp[2])['name'],
-                    # Sometimes the version is in the path...
-                    tmp[3] if len(tmp) == 5
-                    # ... and some other times contained within the name.
-                    else re.search(SEMVER_REGEX, tmp[3]).group(0),
-                    # Microsoft has tagged some libraries very badly...
-                    # Check `CORRESPONDENCES` above for this entry.
-                    CORRESPONDENCES.get(tmp[2]).get('fuzzyCheck', False)
-                )
+            self.name = tmp[2]
+            self.compare_with_latest_github_tag(
+                correspondences.get(tmp[2])['owner'],
+                correspondences.get(tmp[2])['name'],
+                # Sometimes the version is in the path...
+                tmp[3] if len(tmp) == 5
+                # ... and some other times contained within the name.
+                else re.search(SEMVER_REGEX, tmp[3]).group(0),
+                # Microsoft has tagged some libraries very badly...
+                # Check `correspondences` above for this entry.
+                correspondences.get(tmp[2]).get('fuzzy_check', False)
+            )
 
-        elif self.parsedResult.netloc == 'cdn.ckeditor.com':
-            tmp = self.parsedResult.path.split('/')
+        elif self.parsed_result.netloc == 'cdn.ckeditor.com':
+            tmp = self.parsed_result.path.split('/')
 
             if tmp[1] == 'ckeditor5' and \
                tmp[3] in ['classic', 'inline', 'balloon']:
-
-                self.name = '{0} ({1})'.format(tmp[1], tmp[3])
-                self.compareWithLatestGitHubRelease('ckeditor', tmp[1], tmp[2])
+                self.name = "{0} ({1})".format(tmp[1], tmp[3])
+                self.compare_with_latest_github_release('ckeditor', tmp[1], tmp[2])
 
             else:
                 self.status = 'not_found'
                 return
 
-        elif False:
-            # Additional CDN providers will have to be handled there
-            pass
+        # Additional CDN providers may be handled there.
 
         else:
-            log_message('This statement should not be reached.')
+            log_message("This statement should not be reached.")
 
-    # The methods below are handling interface with the providers' API...
-    # ... and version comparison.
-    def compareWithLatestCDNJSVersion(self, name, version):
+    def compare_with_latest_cdnjs_version(self, name, version):
+        """This method handles call and result comparison with the CDNJS' API"""
+
         # We ask CDNJS API to retrieve information about this library.
         request = urlopen(
-            'https://api.cdnjs.com/libraries?search={name}&fields=version'
-            .format(name=quote(name))
+            "https://api.cdnjs.com/libraries?search={name}&fields=version".format(
+                name=quote(name)
+            )
         )
 
         # If the request was a success...
@@ -383,10 +389,10 @@ class CDNContent():
             for result in data['results']:
                 if result['name'] == name:
                     # We set here its name and version for future usages.
-                    self.latestVersion = result['version']
+                    self.latest_version = result['version']
 
                     # ... let's compare its version with ours !
-                    if self.latestVersion == version:
+                    if self.latest_version == version:
                         self.status = 'up_to_date'
 
                     else:
@@ -400,42 +406,36 @@ class CDNContent():
         else:
             self.status = 'not_found'
             log_message(
-                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                "The HTTP response was not successful for \"{}\" ({}).".format(
                     request.geturl(),
                     request.getcode()
                 )
             )
 
-    def compareWithLatestGitHubTag(self, owner, name, version,
-                                   fuzzyCheck=False):
+    def compare_with_latest_github_tag(
+            self,
+            owner, name, version,
+            fuzzy_check=False):
         """
         This method fetches tags from the `owner/name` repository on GitHub...
         ... and compares it with `version`.
         `self.status` will be set according to the previous comparison.
         """
-
-        # We load the settings file to retrieve a GitHub API token afterwards.
-        self.settings = load_settings('CDNUpdates.sublime-settings')
-
         request = urlopen(Request(
-            'https://api.github.com/repos/{owner}/{name}/tags'.format(
+            "https://api.github.com/repos/{owner}/{name}/tags".format(
                 owner=quote(owner),
                 name=quote(name)),
             headers={
-                'Authorization': 'token ' +
-                self.settings.get('github_api_token')
+                'Authorization': "token {}".format(self.settings.get('github_api_token'))
             } if self.settings.get('github_api_token') else {}
         ))
 
         if request.getcode() == 200:
             data = json.loads(request.read().decode())
-
             if len(data) >= 1:
-                self.latestVersion = data[0]['name'].lstrip('v')
-                if (not fuzzyCheck and self.latestVersion == version) \
-                        or self.latestVersion.lower().find(
-                            version.lower(), 0) == 0:
-
+                self.latest_version = data[0]['name'].lstrip('v')
+                if (not fuzzy_check and self.latest_version == version) \
+                        or self.latest_version.lower().find(version.lower(), 0) == 0:
                     self.status = 'up_to_date'
 
                 else:
@@ -448,23 +448,21 @@ class CDNContent():
         else:
             self.status = 'not_found'
             log_message(
-                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                "The HTTP response was not successful for \"{}\" ({}).".format(
                     request.geturl(),
                     request.getcode()
                 )
             )
 
-    def compareWithLatestGitHubRelease(self, owner, name, version,
-                                       fuzzyCheck=False):
+    def compare_with_latest_github_release(
+            self,
+            owner, name, version,
+            fuzzy_check=False):
         """
         This method fetches the latest release from the `owner/name`...
         ... repository on GitHub and compares it with `version`.
         `self.status` will be set according to the previous comparison.
         """
-
-        # We load the settings file to retrieve a GitHub API token afterwards.
-        self.settings = load_settings('CDNUpdates.sublime-settings')
-
         request = urlopen(Request(
             'https://api.github.com/repos/{owner}/{name}/releases/latest'
             .format(
@@ -472,19 +470,16 @@ class CDNContent():
                 name=quote(name)
             ),
             headers={
-                'Authorization': 'token ' +
-                self.settings.get('github_api_token')
+                'Authorization': 'token ' + self.settings.get('github_api_token')
             } if self.settings.get('github_api_token') else {}
         ))
 
         if request.getcode() == 200:
             data = json.loads(request.read().decode())
 
-            self.latestVersion = data['tag_name'].lstrip('v')
-            if (not fuzzyCheck and self.latestVersion == version) \
-                    or self.latestVersion.lower().find(
-                        version.lower(), 0) == 0:
-
+            self.latest_version = data['tag_name'].lstrip('v')
+            if (not fuzzy_check and self.latest_version == version) \
+                    or self.latest_version.lower().find(version.lower(), 0) == 0:
                 self.status = 'up_to_date'
 
             else:
@@ -493,33 +488,30 @@ class CDNContent():
         else:
             self.status = 'not_found'
             log_message(
-                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                "The HTTP response was not successful for \"{}\" ({}).".format(
                     request.geturl(),
                     request.getcode()
                 )
             )
 
-    def compareWithNPMJSVersion(self, name, version):
+    def compare_with_npmjs_version(self, name, version):
+        """This method handles call and result comparison with the NPMJS' API"""
         request = urlopen(Request(
-            'https://api.npms.io/v2/search?q={name}'.format(name=quote(name)),
-            # The API of NPMJS blocks the scripts, we need to spoof a real UA.
-            headers={
-                'User-Agent': 'Mozilla/5.0(X11; U; Linux i686) '
-                              'Gecko/20071127 Firefox/2.0.0.11'
+            "https://api.npms.io/v2/search?q={name}".format(name=quote(name)),
+            headers={  # The API of NPMJS blocks scripts, we need to spoof a real UA.
+                'User-Agent': "Mozilla/5.0(X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
             }
         ))
 
         if request.getcode() == 200:
             data = json.loads(request.read().decode())
-
             if data['total'] >= 1 and \
                     data['results'][0]['package']['name'] == name and \
                     data['results'][0]['searchScore'] >= 100000:
-
-                self.latestVersion = data['results'][0]['package']['version']
+                self.latest_version = data['results'][0]['package']['version']
 
                 # "Fuzzy" version checking below !
-                if self.latestVersion.find(version, 0) == 0:
+                if self.latest_version.find(version, 0) == 0:
                     self.status = 'up_to_date'
 
                 else:
@@ -531,28 +523,30 @@ class CDNContent():
         else:
             self.status = 'not_found'
             log_message(
-                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                "The HTTP response was not successful for \"{}\" ({}).".format(
                     request.geturl(),
                     request.getcode()
                 )
             )
 
-    def compareWithLatestWPSVNTag(self, name, version):
+    def compare_with_latest_wpsvn_tag(self, name, version):
+        """This method parses HTML from WordPress' SVN plugin page to retrieve the latest tag"""
         request = urlopen(
-            'https://plugins.svn.wordpress.org/{name}/tags/'.format(
+            "https://plugins.svn.wordpress.org/{name}/tags/".format(
                 name=quote(name)
             )
         )
 
         if request.getcode() == 200:
             # A f*cked-up one-liner to retrieve the latest version from SVN...
-            data = re.findall('<li><a href=\".*\">(.*)<\/a><\/li>',
-                              request.read().decode())
-
+            data = re.findall(
+                r"<li><a href=\".*\">(.*)<\/a><\/li>",
+                request.read().decode()
+            )
             if len(data) >= 1:
-                self.latestVersion = data[-1].rstrip('/')
+                self.latest_version = data[-1].rstrip('/')
 
-                if self.latestVersion == version:
+                if self.latest_version == version:
                     self.status = 'up_to_date'
 
                 else:
@@ -564,7 +558,7 @@ class CDNContent():
         else:
             self.status = 'not_found'
             log_message(
-                'The HTTP response was not successful for \"{}\" ({}).'.format(
+                "The HTTP response was not successful for \"{}\" ({}).".format(
                     request.geturl(),
                     request.getcode()
                 )

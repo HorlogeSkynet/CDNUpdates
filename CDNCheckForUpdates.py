@@ -1,50 +1,59 @@
-
+"""CDNUpdates' update verification entry point"""
 
 import os
 from threading import Thread
+from urllib.error import HTTPError
 
-from sublime import DRAW_EMPTY_AS_OVERWRITE, DRAW_NO_FILL, DRAW_NO_OUTLINE, \
+from sublime import (
+    DRAW_EMPTY_AS_OVERWRITE,
+    DRAW_NO_FILL,
+    DRAW_NO_OUTLINE,
     DRAW_SOLID_UNDERLINE
+)
 from sublime import LAYOUT_BLOCK, message_dialog
 
 from .CDNUtils import log_message
 
 
 class CheckForUpdates(Thread):
-    def __init__(self, view, cdnContentList):
-        self.view = view
-        self.cdnContentList = cdnContentList
+    """This class run asynchronously the CDNs version checking upstream."""
 
-        # Threading initialization
+    def __init__(self, view, cdn_content_list):
+        self.view = view
+        self.cdn_content_list = cdn_content_list
+
+        # Threading initialization.
         Thread.__init__(self)
 
     def run(self):
-        # See `CDNContent.py:handleProvider()` to check what is done.
-        for cdnContent in self.cdnContentList:
+        # See `CDNContent.py:handle_provider()` to check what is done.
+        for cdn_content in self.cdn_content_list:
             try:
-                cdnContent.handleProvider()
+                cdn_content.handle_provider()
 
-            except OSError as e:
+            except HTTPError as error:
                 # Let's log an error there for the user (if `debug` is `true`).
-                log_message('An error occurred for \"{0}\" ({1}).'.format(
-                    cdnContent.parsedResult.geturl(),
-                    e.reason)
+                log_message(
+                    "An error occurred for \"{0}\" ({1}).".format(
+                        cdn_content.parsed_result.geturl(),
+                        error.reason
+                    )
                 )
 
                 # But we'll display a red icon anyway...
-                cdnContent.status = 'not_found'
+                cdn_content.status = 'not_found'
 
             # If this CDN represents a problem "that has to be fixed"...
-            if cdnContent.status == 'to_update':
+            if cdn_content.status == 'to_update':
                 # ... let's scroll directly to its location.
-                self.view.show(cdnContent.sublimeRegion)
+                self.view.show(cdn_content.sublime_region)
 
                 # If the CDN is to update and we retrieved a newer version...
                 # ...let's set a "Phantom" with an interesting content 😉
-                if cdnContent.latestVersion:
+                if cdn_content.latest_version:
                     self.view.add_phantom(
                         'latest_versions',
-                        cdnContent.sublimeRegion,
+                        cdn_content.sublime_region,
                         """
                             <body id="CDN-new_version">
                                 <style>
@@ -58,7 +67,7 @@ class CheckForUpdates(Thread):
                                     New version for {0} found : <b>{1}</b>
                                 </div>
                             </body>
-                        """.format(cdnContent.name, cdnContent.latestVersion),
+                        """.format(cdn_content.name, cdn_content.latest_version),
                         LAYOUT_BLOCK
                     )
 
@@ -66,7 +75,7 @@ class CheckForUpdates(Thread):
                 else:
                     self.view.add_phantom(
                         'specify_versions',
-                        cdnContent.sublimeRegion,
+                        cdn_content.sublime_region,
                         """
                             <body id="CDN-no_version_found">
                                 <style>
@@ -80,17 +89,18 @@ class CheckForUpdates(Thread):
                                     You should specify a version for <b>{}</b>.
                                 </div>
                             </body>
-                        """.format(cdnContent.parsedResult.path
-                                   .rpartition('/')[2]),
+                        """.format(
+                            cdn_content.parsed_result.path.rpartition('/')[2]
+                        ),
                         LAYOUT_BLOCK
                     )
 
             # Security measures !
             # If this resource is not loaded over HTTPS, we add a warning !
-            if cdnContent.parsedResult.scheme != 'https':
+            if cdn_content.parsed_result.scheme != 'https':
                 self.view.add_phantom(
                     'specify_https',
-                    cdnContent.sublimeRegion,
+                    cdn_content.sublime_region,
                     """
                         <body id="CDN-https_warning">
                             <style>
@@ -104,9 +114,10 @@ class CheckForUpdates(Thread):
                                 You should load <b>{0}</b> over HTTPS !
                             </div>
                         </body>
-                    """.format(cdnContent.name or
-                               cdnContent.parsedResult.path
-                               .rpartition('/')[2]),
+                    """.format(
+                        cdn_content.name or
+                        cdn_content.parsed_result.path.rpartition('/')[2]
+                    ),
                     LAYOUT_BLOCK
                 )
 
@@ -115,26 +126,29 @@ class CheckForUpdates(Thread):
         for status in ['up_to_date', 'to_update', 'not_found']:
             self.view.add_regions(
                 status,
-                [cdnContent.sublimeRegion for cdnContent in self.cdnContentList
-                    if cdnContent.status == status],
+                [cdn_content.sublime_region for cdn_content in self.cdn_content_list
+                 if cdn_content.status == status],
                 'text',
-                'Packages/CDNUpdates/Icons/{0}.png'.format(status),
+                "Packages/CDNUpdates/Icons/{0}.png".format(status),
                 DRAW_EMPTY_AS_OVERWRITE | DRAW_NO_FILL | DRAW_NO_OUTLINE |
                 DRAW_SOLID_UNDERLINE
             )
 
         # Let's make appear a message dialog with a report for the user.
-        message_dialog('CDNUpdates :{0}{0}'
-                       '• {1} CDN already up to date.{0}'
-                       '• {2} CDN to update.{0}'
-                       '• {3} CDN not found.{0}'
-                       '• {4} CDN not loaded over HTTPS.'.format(
-                        os.linesep,
-                        len([i for i in self.cdnContentList
-                            if i.status == 'up_to_date']),
-                        len([i for i in self.cdnContentList
-                            if i.status == 'to_update']),
-                        len([i for i in self.cdnContentList
-                            if i.status == 'not_found']),
-                        len([i for i in self.cdnContentList
-                            if i.parsedResult.scheme != 'https'])))
+        message_dialog(
+            "CDNUpdates :{0}{0}"
+            "• {1} CDN already up to date.{0}"
+            "• {2} CDN to update.{0}"
+            "• {3} CDN not found.{0}"
+            "• {4} CDN not loaded over HTTPS.".format(
+                os.linesep,
+                len([i for i in self.cdn_content_list
+                     if i.status == 'up_to_date']),
+                len([i for i in self.cdn_content_list
+                     if i.status == 'to_update']),
+                len([i for i in self.cdn_content_list
+                     if i.status == 'not_found']),
+                len([i for i in self.cdn_content_list
+                     if i.parsed_result.scheme != 'https'])
+            )
+        )

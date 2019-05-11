@@ -1,4 +1,4 @@
-
+"""CDNUpdates' CDN providers verification"""
 
 from urllib.parse import urlparse
 
@@ -6,29 +6,30 @@ from .CDNContent import CDNContent, CDNPROVIDERS
 from .CDNUtils import log_message
 
 
-class CheckForCDNProviders():
-    def __init__(self, view, cdnContentList, regionList):
-        self.view = view
-        self.cdnContentList = cdnContentList
-        self.regionList = regionList
+class CheckForCDNProviders:  # pylint: disable=too-few-public-methods
+    """
+    A simple class to verify that the links found within the view are handled by the plugin.
+    """
 
-        """
-        Simple method to filter out the regions containing a link not handled.
-        """
-        for region in self.regionList:
+    def __init__(self, view, cdn_content_list, region_list):
+        """Simple method to filter out the regions containing a link not handled"""
+        self.view = view
+        self.cdn_content_list = cdn_content_list
+        self.region_list = region_list
+
+        for region in self.region_list:
             # We parse the URL taken from that region...
-            parsedResult = urlparse(
-                self.view.substr(region)
-            )
+            parsed_result = urlparse(self.view.substr(region))
 
             # ... to check if it's a known CDN provider.
-            if parsedResult.netloc in CDNPROVIDERS:
+            if parsed_result.netloc in CDNPROVIDERS:
                 # If this matches, we store it and move on to the next element.
-                self.cdnContentList.append(CDNContent(region, parsedResult))
+                self.cdn_content_list.append(CDNContent(region, parsed_result))
 
             # If not, we'll just ignore this region in the future.
             else:
                 log_message(
-                    '\"{0}\" has been detected, but won\'t be handled here.'
-                    .format(parsedResult.netloc)
+                    "\"{0}\" has been detected, but won\'t be handled here.".format(
+                        parsed_result.netloc
+                    )
                 )
