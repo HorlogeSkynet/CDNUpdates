@@ -41,7 +41,7 @@
 								"command": "edit_settings",
 								"args":
 								{
-									"base_file": "${packages}/CDNUpdates/CDNUpdates.sublime-settings",
+									"base_file": "${packages}/CDNUpdates/Settings/CDNUpdates.sublime-settings",
 									"default": "// CDNUpdates Settings - User\n{\n\t$0\n}\n"
 								}
 							},
