@@ -124,7 +124,7 @@ class CheckForUpdates(Thread):
 
         # Let's add some regions for the user with specific icons.
         # This is done afterwards to reduce the number of regions drawn.
-        for status in ['up_to_date', 'to_update', 'not_found']:
+        for status in ('up_to_date', 'to_update', 'not_found'):
             self.view.add_regions(
                 status,
                 [cdn_content.sublime_region for cdn_content in self.cdn_content_list

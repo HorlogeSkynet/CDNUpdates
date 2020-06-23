@@ -78,7 +78,7 @@ class CDNContent:
                 self.name = 'jquery'
                 version = SEMVER_REGEXP_OBJECT.search(tmp[1])
                 version = version and version.group(0)
-            elif tmp[1] in ['ui', 'mobile', 'color']:
+            elif tmp[1] in ('ui', 'mobile', 'color'):
                 self.name = 'jquery-' + tmp[1]
                 version = tmp[2]
             elif tmp[1] == 'qunit':
@@ -205,7 +205,7 @@ class CDNContent:
                 tmp[2]
             )
 
-        elif self.parsed_result.netloc in ['ajax.microsoft.com', 'ajax.aspnetcdn.com']:
+        elif self.parsed_result.netloc in ('ajax.microsoft.com', 'ajax.aspnetcdn.com'):
             tmp = self.parsed_result.path.split('/')
 
             # Sometimes the version is in the path...
@@ -234,7 +234,7 @@ class CDNContent:
             tmp = self.parsed_result.path.split('/')
 
             if tmp[1] == 'ckeditor5' and \
-               tmp[3] in ['classic', 'inline', 'balloon']:
+               tmp[3] in ('classic', 'inline', 'balloon'):
                 self.name = "{0} ({1})".format(tmp[1], tmp[3])
                 self._compare_with_latest_github_release('ckeditor', tmp[1], tmp[2])
 
