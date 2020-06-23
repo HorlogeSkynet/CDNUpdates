@@ -48,7 +48,7 @@ Package Control dedicated page [here](https://packagecontrol.io/packages/CDNUpda
 Most of the CDN providers don't provide any API for their service, so it would be very tricky to retrieve latest version available directly from them.  
 Unless for <https://cdnjs.com/>, this plugin is actually based on the GitHub API to fetch the latest existing Git tag directly from the repositories. Its `name` is compared afterwards with the CDN version present in your sources.  
 If you have many many CDNs in your sheets (or if you want to contribute to this project 😜), you'll surely need to set a GitHub API token to avoid being blocked by the rate limit.  
-You can generate one [here](https://github.com/settings/tokens), and paste in under the plugin preferences (accessible from `CDNUpdates`'s Sublime menu).
+You can generate one [here](https://github.com/settings/tokens) (`public_repo` scope), and paste in under the plugin preferences (accessible from `CDNUpdates`'s Sublime menu).
 
 ## CDN Providers currently handled
 
