@@ -13,7 +13,7 @@ from .CDNConstants import (
     CDN_STATIC_FILE_CORRESPONDENCES,
     MAXCDN_BOOTSTRAP_CORRESPONDENCES,
     OPENSOURCE_KEYCDN_CORRESPONDENCES,
-    SEMVER_REGEX
+    SEMVER_REGEXP_OBJECT
 )
 from .CDNUtils import log_message
 
@@ -76,21 +76,22 @@ class CDNContent:
 
             if tmp[1].startswith('jquery'):
                 self.name = 'jquery'
-                version = re.search(SEMVER_REGEX, tmp[1]).group(0)
-
+                version = SEMVER_REGEXP_OBJECT.search(tmp[1])
+                version = version and version.group(0)
             elif tmp[1] in ['ui', 'mobile', 'color']:
                 self.name = 'jquery-' + tmp[1]
                 version = tmp[2]
-
             elif tmp[1] == 'qunit':
                 self.name = 'qunit'
-                version = re.search(SEMVER_REGEX, tmp[2]).group(0)
-
+                version = SEMVER_REGEXP_OBJECT.search(tmp[2])
+                version = version and version.group(0)
             elif tmp[1] == 'pep':
                 self.name = 'PEP'
                 version = tmp[2]
-
             else:
+                version = None
+
+            if not version:
                 self.status = 'not_found'
                 return
 
@@ -159,9 +160,8 @@ class CDNContent:
             # If no semantic version is specified in the URL, we assume either:
             # * The developer uses the latest version available (`master`) [OR]
             # * The developer knows what he is doing (commit hash specified)
-            if re.search(SEMVER_REGEX, tmp[3]) is None:
+            if not SEMVER_REGEXP_OBJECT.search(tmp[3]):
                 self.status = 'up_to_date'
-
             else:
                 # If not, we compare this version with the latest tag !
                 self.compare_with_latest_github_tag(tmp[1], self.name, tmp[3])
@@ -207,7 +207,16 @@ class CDNContent:
 
         elif self.parsed_result.netloc in ['ajax.microsoft.com', 'ajax.aspnetcdn.com']:
             tmp = self.parsed_result.path.split('/')
-            if tmp[2] not in AJAX_MICROSOFT_CORRESPONDENCES.keys():
+
+            # Sometimes the version is in the path...
+            if len(tmp) == 5:
+                version = tmp[3]
+            # ... and some other times contained within the name.
+            else:
+                version = SEMVER_REGEXP_OBJECT.search(tmp[3])
+                version = version and version.group(0)
+
+            if tmp[2] not in AJAX_MICROSOFT_CORRESPONDENCES.keys() or not version:
                 self.status = 'not_found'
                 return
 
@@ -215,10 +224,7 @@ class CDNContent:
             self.compare_with_latest_github_tag(
                 AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2])['owner'],
                 AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2])['name'],
-                # Sometimes the version is in the path...
-                tmp[3] if len(tmp) == 5
-                # ... and some other times contained within the name.
-                else re.search(SEMVER_REGEX, tmp[3]).group(0),
+                version,
                 # Microsoft has tagged some libraries very badly...
                 # Check `CDNConstants.AJAX_MICROSOFT_CORRESPONDENCES` for this entry.
                 AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2]).get('fuzzy_check', False)
