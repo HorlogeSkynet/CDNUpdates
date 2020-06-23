@@ -112,7 +112,7 @@ class CheckForUpdates(Thread):
                                 }}
                             </style>
                             <div class="https_warning">
-                                You should load <b>{0}</b> over HTTPS !
+                                You should explicitly load <b>{0}</b> over HTTPS !
                             </div>
                         </body>
                     """.format(
