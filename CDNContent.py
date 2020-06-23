@@ -54,7 +54,7 @@ class CDNContent:
             tmp = self.parsed_result.path.split('/')
             self.name = tmp[3]
 
-            self.compare_with_latest_cdnjs_version(self.name, tmp[4])
+            self._compare_with_latest_cdnjs_version(self.name, tmp[4])
 
         elif self.parsed_result.netloc == 'maxcdn.bootstrapcdn.com':
             tmp = self.parsed_result.path.split('/')
@@ -64,7 +64,7 @@ class CDNContent:
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(
+            self._compare_with_latest_github_tag(
                 MAXCDN_BOOTSTRAP_CORRESPONDENCES.get(self.name)['owner'],
                 MAXCDN_BOOTSTRAP_CORRESPONDENCES.get(self.name)['name'],
                 tmp[2]
@@ -95,7 +95,7 @@ class CDNContent:
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(
+            self._compare_with_latest_github_tag(
                 # Only `QUnit` belongs to another organization.
                 ('qunitjs' if self.name == 'qunit' else 'jquery'),
                 self.name,
@@ -110,7 +110,7 @@ class CDNContent:
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(
+            self._compare_with_latest_github_tag(
                 AJAX_GOOGLE_APIS_CORRESPONDENCES.get(self.name)['owner'],
                 AJAX_GOOGLE_APIS_CORRESPONDENCES.get(self.name)['name'],
                 tmp[4]
@@ -126,11 +126,11 @@ class CDNContent:
             try:
                 if tmp[1] == 'npm':
                     self.name, version = tmp[2].split('@')
-                    self.compare_with_npmjs_version(self.name, version)
+                    self._compare_with_npmjs_version(self.name, version)
 
                 elif tmp[1] == 'gh':
                     self.name, version = tmp[3].split('@')
-                    self.compare_with_latest_github_tag(
+                    self._compare_with_latest_github_tag(
                         tmp[2], self.name, version,
                         fuzzy_check=True
                     )
@@ -142,7 +142,7 @@ class CDNContent:
                         raise IndexError
 
                     self.name = tmp[2]
-                    self.compare_with_latest_wpsvn_tag(self.name, tmp[4])
+                    self._compare_with_latest_wpsvn_tag(self.name, tmp[4])
 
                 else:
                     self.status = 'not_found'
@@ -164,12 +164,12 @@ class CDNContent:
                 self.status = 'up_to_date'
             else:
                 # If not, we compare this version with the latest tag !
-                self.compare_with_latest_github_tag(tmp[1], self.name, tmp[3])
+                self._compare_with_latest_github_tag(tmp[1], self.name, tmp[3])
 
         elif self.parsed_result.netloc == 'code.ionicframework.com':
             tmp = self.parsed_result.path.split('/')
             self.name = tmp[1]
-            self.compare_with_latest_github_release('ionic-team', self.name, tmp[2])
+            self._compare_with_latest_github_release('ionic-team', self.name, tmp[2])
 
         elif self.parsed_result.netloc == 'use.fontawesome.com':
             self.name = 'Font Awesome'
@@ -185,7 +185,7 @@ class CDNContent:
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(
+            self._compare_with_latest_github_tag(
                 OPENSOURCE_KEYCDN_CORRESPONDENCES.get(self.name)['owner'],
                 OPENSOURCE_KEYCDN_CORRESPONDENCES.get(self.name)['name'],
                 tmp[2]
@@ -199,7 +199,7 @@ class CDNContent:
                 self.status = 'not_found'
                 return
 
-            self.compare_with_latest_github_tag(
+            self._compare_with_latest_github_tag(
                 CDN_STATIC_FILE_CORRESPONDENCES.get(self.name)['owner'],
                 CDN_STATIC_FILE_CORRESPONDENCES.get(self.name)['name'],
                 tmp[2]
@@ -221,7 +221,7 @@ class CDNContent:
                 return
 
             self.name = tmp[2]
-            self.compare_with_latest_github_tag(
+            self._compare_with_latest_github_tag(
                 AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2])['owner'],
                 AJAX_MICROSOFT_CORRESPONDENCES.get(tmp[2])['name'],
                 version,
@@ -236,7 +236,7 @@ class CDNContent:
             if tmp[1] == 'ckeditor5' and \
                tmp[3] in ['classic', 'inline', 'balloon']:
                 self.name = "{0} ({1})".format(tmp[1], tmp[3])
-                self.compare_with_latest_github_release('ckeditor', tmp[1], tmp[2])
+                self._compare_with_latest_github_release('ckeditor', tmp[1], tmp[2])
 
             else:
                 self.status = 'not_found'
@@ -247,7 +247,7 @@ class CDNContent:
         else:
             log_message("This statement should not be reached.")
 
-    def compare_with_latest_cdnjs_version(self, name, version):
+    def _compare_with_latest_cdnjs_version(self, name, version):
         """This method handles call and result comparison with the CDNJS' API"""
 
         # We ask CDNJS API to retrieve information about this library.
@@ -289,7 +289,7 @@ class CDNContent:
                 )
             )
 
-    def compare_with_latest_github_tag(
+    def _compare_with_latest_github_tag(
             self,
             owner, name, version,
             fuzzy_check=False):
@@ -331,7 +331,7 @@ class CDNContent:
                 )
             )
 
-    def compare_with_latest_github_release(
+    def _compare_with_latest_github_release(
             self,
             owner, name, version,
             fuzzy_check=False):
@@ -371,7 +371,7 @@ class CDNContent:
                 )
             )
 
-    def compare_with_npmjs_version(self, name, version):
+    def _compare_with_npmjs_version(self, name, version):
         """This method handles call and result comparison with the NPMJS' API"""
         request = urlopen(Request(
             "https://api.npms.io/v2/search?q={name}".format(name=quote(name)),
@@ -406,7 +406,7 @@ class CDNContent:
                 )
             )
 
-    def compare_with_latest_wpsvn_tag(self, name, version):
+    def _compare_with_latest_wpsvn_tag(self, name, version):
         """This method parses HTML from WordPress' SVN plugin page to retrieve the latest tag"""
         request = urlopen(
             "https://plugins.svn.wordpress.org/{name}/tags/".format(
