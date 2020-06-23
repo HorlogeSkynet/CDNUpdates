@@ -117,11 +117,9 @@ class CDNContent:
 
         # CDN from CDN.JSDLIVR.NET will be handled here.
         elif self.parsed_result.netloc == 'cdn.jsdelivr.net':
-            """
-            The API from JSDLIVR is powerful.
-            It implies we compute a "fuzzy" version checking.
-            For instance : "jquery@3" is OK for '3.2.1'.
-            """
+            # The API from JSDLIVR is powerful.
+            # It implies we compute a "fuzzy" version checking.
+            # For instance : "jquery@3" is OK for '3.2.1'.
             tmp = self.parsed_result.path.split('/')
 
             try:
@@ -138,7 +136,7 @@ class CDNContent:
 
                 elif tmp[1] == 'wp':
                     # This how we'll handle the latest version references, as :
-                    # (https://cdn.jsdelivr.net/wp/wp-slimstat/trunk/wp-slimstat.js)
+                    # <https://cdn.jsdelivr.net/wp/wp-slimstat/trunk/wp-slimstat.js>
                     if len(tmp) < 6:
                         raise IndexError
 

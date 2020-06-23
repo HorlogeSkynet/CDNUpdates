@@ -1,7 +1,6 @@
 """CDNUpdates main class"""
 
 from sublime import error_message
-
 from sublime_plugin import EventListener, TextCommand
 
 from .CDNCheckForCDNProviders import CheckForCDNProviders
@@ -27,10 +26,10 @@ class CDNUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
         """
         # First we check if the current sheet is not still being loaded.
         if self.view.is_loading():
-            error_message("This file is not fully loaded yet.")
+            error_message("This view is not fully loaded yet.")
             return
 
-        # If it's OK, we clear the view from the elements added previously.
+        # If it's OK, we clear the view from the previously added elements.
         clear_view(self.view)
 
         self.view.set_status(

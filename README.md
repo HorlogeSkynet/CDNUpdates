@@ -71,7 +71,7 @@ You can generate one [here](https://github.com/settings/tokens), and paste in un
 
 > It'll be done automatically next time you'll save your sheet :wink:
 
-### I've updated my links, but the _Phantom_ objects don't want to leave...
+### I've updated my links, how can I get rid of these _Phantom_ objects ?
 
 > Same as above :smile:
 

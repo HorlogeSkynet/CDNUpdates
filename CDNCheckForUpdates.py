@@ -8,9 +8,10 @@ from sublime import (
     DRAW_EMPTY_AS_OVERWRITE,
     DRAW_NO_FILL,
     DRAW_NO_OUTLINE,
-    DRAW_SOLID_UNDERLINE
+    DRAW_SOLID_UNDERLINE,
+    LAYOUT_BLOCK,
+    message_dialog
 )
-from sublime import LAYOUT_BLOCK, message_dialog
 
 from .CDNUtils import log_message
 

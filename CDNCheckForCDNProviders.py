@@ -2,8 +2,8 @@
 
 from urllib.parse import urlparse
 
-from .CDNConstants import CDN_PROVIDERS
 from .CDNContent import CDNContent
+from .CDNConstants import CDN_PROVIDERS
 from .CDNUtils import log_message
 
 
