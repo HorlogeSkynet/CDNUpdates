@@ -18,7 +18,7 @@ from .CDNConstants import (
 from .CDNUtils import log_message
 
 
-class CDNContent:
+class CDNContent:  # pylint: disable=too-few-public-methods
     """
     This class run verifies whether found CDN are up to date.
     Checks (try to) rely on the CDN provider's API, or on GitHub directly.
