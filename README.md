@@ -1,6 +1,6 @@
 # CDNUpdates
 
-> A Sublime Text 3 plugin to check for CDN updates in your Web sources
+> A Sublime Text 3+ plugin to check for CDN updates in your Web sources
 
 ![Preview](https://i.imgur.com/WrxQApP.png)
 
@@ -8,7 +8,7 @@
 
 Tired of manually checking if your CDN (_Content Delivery Network_) are up to date in your web pages ? Yeah, so was I... :confused:
 
-Below is a sum-up of what this Sublime Text 3 plugin does (well) to help you dealing about that :
+Below is a sum-up of what this Sublime Text 3+ plugin does (well) to help you deal about this :
 
 1. Gathers links present in your current sheet
 2. Compares them to a list containing known public CDN providers
