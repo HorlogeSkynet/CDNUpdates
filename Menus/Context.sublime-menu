@@ -1,12 +1,12 @@
 [
-{
-	"id": "cdn_updates",
-	"caption": "CDNUpdates",
-	"children": [
-		{
-			"command": "c_dNUpdates",
-			"caption": "Check this view for CDN updates"
-		}
-	]
-}
+	{
+		"id": "cdn_updates",
+		"caption": "CDNUpdates",
+		"children": [
+			{
+				"command": "c_dNUpdates",
+				"caption": "Check this view for CDN updates"
+			}
+		]
+	}
 ]
