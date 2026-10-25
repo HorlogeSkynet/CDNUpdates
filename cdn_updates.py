@@ -3,13 +3,13 @@
 from sublime import error_message
 from sublime_plugin import EventListener, TextCommand
 
-from .CDNCheckForCDNProviders import CheckForCDNProviders
-from .CDNCheckForLinks import CheckForLinks
-from .CDNCheckForUpdates import CheckForUpdates
-from .CDNUtils import clear_view
+from .check_for_cdn_providers import CheckForCdnProviders
+from .check_for_links import CheckForLinks
+from .check_for_updates import CheckForUpdates
+from .utils import clear_view
 
 
-class CDNUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
+class CdnUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
     """
     Entry point of CDNUpdates.
     The `run` method is called when the command is run.
@@ -43,7 +43,7 @@ class CDNUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
             'checking_cdn',
             "Checking for known CDN providers..."
         )
-        CheckForCDNProviders(self.view, self.cdn_content_list, self.region_list)
+        CheckForCdnProviders(self.view, self.cdn_content_list, self.region_list)
         self.view.erase_status('checking_cdn')
 
         self.view.set_status(
@@ -55,7 +55,7 @@ class CDNUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
         self.view.erase_status('checking_updates')
 
 
-class CDNUpdatesListener(EventListener):  # pylint: disable=too-few-public-methods
+class CdnUpdatesListener(EventListener):  # pylint: disable=too-few-public-methods
     """Simple ST's listeners implementations"""
 
     def on_pre_save_async(self, view):  # pylint: disable=no-self-use

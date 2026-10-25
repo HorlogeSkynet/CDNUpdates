@@ -4,7 +4,7 @@
 		"caption": "CDNUpdates",
 		"children": [
 			{
-				"command": "c_dNUpdates",
+				"command": "cdn_updates",
 				"caption": "Check this view for CDN updates"
 			}
 		]

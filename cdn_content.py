@@ -7,7 +7,7 @@ from urllib.request import Request, urlopen
 
 from sublime import load_settings
 
-from .CDNConstants import (
+from .constants import (
     AJAX_GOOGLE_APIS_CORRESPONDENCES,
     AJAX_MICROSOFT_CORRESPONDENCES,
     CDN_STATIC_FILE_CORRESPONDENCES,
@@ -15,10 +15,10 @@ from .CDNConstants import (
     OPENSOURCE_KEYCDN_CORRESPONDENCES,
     SEMVER_REGEXP_OBJECT
 )
-from .CDNUtils import log_message
+from .utils import log_message
 
 
-class CDNContent:  # pylint: disable=too-few-public-methods
+class CdnContent:  # pylint: disable=too-few-public-methods
     """
     This class run verifies whether found CDN are up to date.
     Checks (try to) rely on the CDN provider's API, or on GitHub directly.

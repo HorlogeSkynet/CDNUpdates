@@ -78,6 +78,6 @@ You can generate one [here](https://github.com/settings/tokens) (`public_repo` s
 ### Can I add another (or my own) CDN ?
 
 > Of course you can, unless the Open Source aspect of this project would be useless :fearful:  
-> You basically just have to tweak [CDNContent.py](CDNContent.py) and imitate what is done there for your provider.  
+> You basically just have to tweak [cdn_content.py](cdn_content.py) and imitate what is done there for your provider.  
 > Don't forget to share your work with the world ! :earth_africa:  
 > Or... you can just open an [issue here](https://github.com/HorlogeSkynet/CDNUpdates/issues/new) and I'll do my best to handle your case !
