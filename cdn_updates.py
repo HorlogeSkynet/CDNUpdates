@@ -58,6 +58,6 @@ class CdnUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
 class CdnUpdatesListener(EventListener):  # pylint: disable=too-few-public-methods
     """Simple ST's listeners implementations"""
 
-    def on_pre_save_async(self, view):  # pylint: disable=no-self-use
+    def on_pre_save_async(self, view):
         """Just before file-saving, removes each CDNUpdates' object from the view"""
         clear_view(view)
