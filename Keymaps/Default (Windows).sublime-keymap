@@ -1,3 +1,3 @@
 [
-	{ "keys": ["ctrl+shift+c"], "command": "c_dNUpdates" }
+	{ "keys": ["ctrl+shift+c"], "command": "cdn_updates" }
 ]

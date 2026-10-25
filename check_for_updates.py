@@ -13,7 +13,7 @@ from sublime import (
     message_dialog
 )
 
-from .CDNUtils import log_message
+from .utils import log_message
 
 
 class CheckForUpdates(Thread):
@@ -27,7 +27,7 @@ class CheckForUpdates(Thread):
         Thread.__init__(self)
 
     def run(self):
-        # See `CDNContent.py:handle_provider()` to check what is done.
+        # See `cdn_content.py:handle_provider()` to check what is done.
         for cdn_content in self.cdn_content_list:
             try:
                 cdn_content.handle_provider()
