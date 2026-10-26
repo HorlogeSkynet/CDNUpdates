@@ -1,1 +1,2 @@
-tests/* -linguist-detectable
+# Exclude test files from the package
+tests/* -linguist-detectable export-ignore
