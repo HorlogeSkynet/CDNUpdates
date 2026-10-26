@@ -29,7 +29,9 @@ class CdnUpdatesCommand(TextCommand):  # pylint: disable=too-few-public-methods
             error_message("This view is not fully loaded yet.")
             return
 
-        # If it's OK, we clear the view from the previously added elements.
+        # Clear previously added elements as well as regions and phantom objects from view.
+        self.region_list.clear()
+        self.cdn_content_list.clear()
         clear_view(self.view)
 
         self.view.set_status(
